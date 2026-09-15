@@ -57,6 +57,7 @@ pub(crate) const AUTH_FLOWS: Resource = Resource {
             fields: &[
                 Field::new("ID", "/id", FieldKind::ReadOnly),
                 Field::new("Alias", "/alias", FieldKind::Text),
+                Field::new("Flow type", "/providerId", FieldKind::ReadOnly),
                 Field::new("Description", "/description", FieldKind::Multiline),
                 Field::new("Built-in", "/builtIn", FieldKind::ReadOnly)
                     .help("Built-in flows cannot be edited; duplicate one first."),

@@ -44,6 +44,7 @@ pub(crate) const REQUIRED_ACTIONS: Resource = Resource {
             title: "Details",
             fields: &[
                 Field::new("Alias", "/alias", FieldKind::ReadOnly),
+                Field::new("Provider", "/providerId", FieldKind::ReadOnly),
                 Field::new("Name", "/name", FieldKind::Text),
                 Field::new("Enabled", "/enabled", FieldKind::Bool),
                 Field::new("Default action", "/defaultAction", FieldKind::Bool)

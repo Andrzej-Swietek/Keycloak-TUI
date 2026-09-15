@@ -37,10 +37,11 @@ pub(crate) const REALM_FLOW_FIELDS: &[Field] = &[
         "/otpPolicyAlgorithm",
         FieldKind::Choice(&["HmacSHA1", "HmacSHA256", "HmacSHA512"]),
     ),
+    Field::new("OTP digits", "/otpPolicyDigits", FieldKind::Integer),
     Field::new(
-        "OTP digits",
-        "/otpPolicyDigits",
-        FieldKind::Choice(&["6", "8"]),
+        "Supported OTP apps",
+        "/otpSupportedApplications",
+        FieldKind::ReadOnly,
     ),
     Field::new("OTP period", "/otpPolicyPeriod", FieldKind::Seconds),
     Field::new(

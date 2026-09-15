@@ -156,6 +156,7 @@ pub(crate) const MAPPER_FIELDS: &[Field] = &[
         "/protocol",
         FieldKind::Choice(&["openid-connect", "saml"]),
     ),
+    Field::new("Consent required", "/consentRequired", FieldKind::Bool),
     Field::new("Config", "/config", FieldKind::StringMap)
         .help("Mapper-specific keys; the per-surface toggles live here too."),
 ];

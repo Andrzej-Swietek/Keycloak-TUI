@@ -23,6 +23,8 @@ pub(crate) const EVENT_CONFIG: Resource = Resource {
                 Field::new("User events enabled", "/eventsEnabled", FieldKind::Bool),
                 Field::new("User events expiration", "/eventsExpiration", FieldKind::Seconds),
                 Field::new("Enabled event types", "/enabledEventTypes", FieldKind::List),
+                Field::new("User event expiry (s)", "/eventsExpiration", FieldKind::Seconds)
+                    .help("How long a login event is kept. Unset keeps them forever."),
                 Field::new("Admin events enabled", "/adminEventsEnabled", FieldKind::Bool),
                 Field::new("Admin event details", "/adminEventsDetailsEnabled", FieldKind::Bool)
                     .help("Stores the full representation of each admin change — large, but the only way to see what actually changed."),

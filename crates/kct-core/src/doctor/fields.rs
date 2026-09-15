@@ -7,6 +7,9 @@ use crate::json;
 
 use super::finding::Finding;
 
+/// Objects needed before "the catalog declares this and no object has it" carries any signal.
+const MIN_SAMPLES_FOR_UNSET: usize = 3;
+
 /// Fields the catalog claims a resource has, as JSON pointers.
 #[must_use]
 pub fn declared(resource: &Resource) -> BTreeSet<&'static str> {
@@ -22,12 +25,27 @@ pub fn declared(resource: &Resource) -> BTreeSet<&'static str> {
         .collect()
 }
 
+/// Every pointer any screen over the same object renders.
+///
+/// Several screens reach one representation — a group through its own list, a user's groups
+/// and a role's groups all resolve `GROUP` — and a key one of them renders is reachable from
+/// all of them. Screens sharing only the generic `components` endpoint are excluded by their
+/// differing type filter: they are different kinds behind one URL.
+fn rendered_anywhere(resource: &Resource) -> BTreeSet<&'static str> {
+    crate::resources::CATALOG
+        .iter()
+        .filter(|other| other.item == resource.item && other.fixed_params == resource.fixed_params)
+        .flat_map(declared)
+        .collect()
+}
+
 /// Compare what the catalog renders against what the server actually sent.
 ///
-/// Neither direction can prove a breakage on its own. Keycloak omits unset optional fields,
-/// so a pointer that resolves on no sample may simply mean nobody filled it in — worth
-/// looking at after an upgrade, not worth failing a build over. A key no form mentions is
-/// likewise only a gap in coverage: the JSON tab still reaches it.
+/// Two directions, neither fatal. A key the server sends that no screen renders is a
+/// [`super::Severity::Missing`] coverage gap; the raw tab still reaches it. A pointer the catalog
+/// declares that resolves on no sample is a [`super::Severity::Note`], and only once there are
+/// enough samples for "unset everywhere" to mean anything — Keycloak omits unset optional
+/// fields, so on one object it means nothing at all.
 #[must_use]
 pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
     // A screen with no form has nothing to compare: its raw tab renders whatever arrives.
@@ -35,8 +53,10 @@ pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
         return Vec::new();
     }
 
+    let enough = samples.len() >= MIN_SAMPLES_FOR_UNSET;
     let stale = declared(resource)
         .into_iter()
+        .filter(move |_| enough)
         // Pointers into a map the operator fills in themselves are absent by design.
         .filter(|pointer| !pointer.starts_with("/config/") && !pointer.starts_with("/attributes/"))
         .filter(|pointer| {
@@ -45,7 +65,7 @@ pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
                 .all(|sample| json::at(sample, pointer).is_none())
         })
         .map(|pointer| {
-            Finding::missing(
+            Finding::note(
                 resource.id,
                 format!(
                     "form field '{pointer}' was on none of the {} sampled objects — unset, \
@@ -55,7 +75,7 @@ pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
             )
         });
 
-    let rendered = declared(resource);
+    let rendered = rendered_anywhere(resource);
 
     // A form that reaches into nested data (`/systemInfo/version`, `/config/usersDn`) is not
     // comparable against top-level keys: it never intended to render them one-for-one.
@@ -73,7 +93,9 @@ pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
         .collect::<BTreeSet<_>>()
         .into_iter()
         .filter(|key| !covers(key))
-        .filter(|key| !IGNORED.contains(&key.as_str()))
+        .filter(|key| !SERVER_ASSIGNED.contains(&key.as_str()))
+        .filter(|key| !EDITED_ELSEWHERE.contains(&key.as_str()))
+        .filter(|key| !SERVER_CATALOGUES.contains(&key.as_str()))
         .map(|key| {
             Finding::missing(
                 resource.id,
@@ -84,16 +106,62 @@ pub fn compare(resource: &Resource, samples: &[Value]) -> Vec<Finding> {
     stale.chain(unrendered).collect()
 }
 
-/// Keys every representation carries that are not worth a form control.
-const IGNORED: &[&str] = &[
+/// Keys the server assigns and no form should offer to change.
+const SERVER_ASSIGNED: &[&str] = &[
     "access",
+    "adminPermissionsClient",
+    "clientRole",
+    "containerId",
+    "disableableCredentialTypes",
+    "id",
+    "internalId",
+    "notBefore",
+    "origin",
+    "parentId",
+    "providerType",
+    "self",
+    "subGroupCount",
+    "totp",
+    "userProfileMetadata",
+    "types",
+];
+
+/// What `serverinfo` publishes about the build rather than about this realm. Read through the
+/// screens over them, or the raw tab.
+const SERVER_CATALOGUES: &[&str] = &[
+    "builtinProtocolMappers",
+    "clientInstallations",
+    "componentTypes",
+    "cpuInfo",
+    "cryptoInfo",
+    "enums",
+    "features",
+    "identityProviders",
+    "parameterizedScopeTypes",
+    "passwordPolicies",
+    "protocolMapperTypes",
+    "providers",
+    "socialProviders",
+    "themes",
+];
+
+/// Keys carried on a representation whose own screen edits them.
+const EDITED_ELSEWHERE: &[&str] = &[
+    "adminEventsDetailsEnabled",
+    "attributes",
+    "adminEventsEnabled",
+    "authenticationExecutions",
+    "clientPolicies",
+    "clientProfiles",
     "clientRoles",
+    "defaultClientScopes",
+    "enabledEventTypes",
+    "eventsEnabled",
+    "eventsExpiration",
+    "eventsListeners",
+    "groups",
+    "optionalClientScopes",
+    "protocolMappers",
     "realmRoles",
     "subGroups",
-    "protocolMappers",
-    "origin",
-    "self",
-    "disableableCredentialTypes",
-    "notBefore",
-    "totp",
 ];

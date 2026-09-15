@@ -4,13 +4,12 @@ use crate::resources;
 use serde_json::json;
 
 #[test]
-fn a_field_no_object_carries_is_flagged_for_review() {
+fn a_field_no_object_carries_is_flagged_once_there_are_enough_objects() {
     let users = resources::by_id("users").unwrap();
-    // A representation that lost `emailVerified` — exactly what a rename looks like.
     let sample = json!({
         "id": "u1",
-        "username": "alice",
-        "email": "a@b.c",
+        "username": "a",
+        "email": "a@b.test",
         "firstName": "A",
         "lastName": "B",
         "enabled": true,
@@ -20,7 +19,11 @@ fn a_field_no_object_carries_is_flagged_for_review() {
         "attributes": {}
     });
 
-    let findings = compare_fields(users, &[sample]);
+    // One object proves nothing: Keycloak omits an unset optional field.
+    assert!(compare_fields(users, std::slice::from_ref(&sample)).is_empty());
+
+    let many = vec![sample.clone(), sample.clone(), sample];
+    let findings = compare_fields(users, &many);
 
     assert!(
         findings
@@ -29,8 +32,10 @@ fn a_field_no_object_carries_is_flagged_for_review() {
         "{findings:?}"
     );
     assert!(
-        findings.iter().all(|finding| !finding.severity.is_fatal()),
-        "an unset optional field is not proof of a rename"
+        findings
+            .iter()
+            .all(|finding| finding.severity != Severity::Broken),
+        "an unset field is not a breakage"
     );
 }
 
