@@ -1,0 +1,10 @@
+/target
+**/*.rs.bk
+.env
+*.log
+
+# Artefacts the tool writes into the working directory. A realm export carries client
+# secrets and realm private keys; a decoded token carries a bearer.
+/access-token.json
+/export-*.json
+*.token

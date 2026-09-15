@@ -1,0 +1,27 @@
+[package]
+name = "kct"
+description = "keycloak-tui - a fast, complete terminal UI for Keycloak administration"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "kct"
+path = "src/main.rs"
+
+[dependencies]
+kct-core.workspace = true
+kct-client.workspace = true
+kct-tui.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+crossterm.workspace = true
+clap.workspace = true
+toml.workspace = true
+directories.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+anyhow.workspace = true
+chrono.workspace = true

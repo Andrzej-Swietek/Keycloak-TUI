@@ -1,0 +1,53 @@
+use super::prelude::*;
+
+pub(crate) const GROUP_MEMBERS: Resource = Resource {
+    id: "group-members",
+    singular: "Member",
+    plural: "Members",
+    section: Section::Manage,
+    collection: ep::GROUP_MEMBERS,
+    item: Some(ep::USER),
+    shape: Shape::Array,
+    fixed_params: &[],
+    key: Key::ID,
+    new_object: None,
+    label: &["/username", "/id"],
+    columns: USER_COLUMNS,
+    search: Search::Client,
+    ops: Ops::RO,
+    requirement: Requirement::Always,
+    tabs: &[Tab::Raw],
+    actions: &[],
+    keywords: &["who is in", "membership"],
+    summary: "Users that are direct members of this group.",
+};
+
+pub(crate) const ORG_MEMBERS: Resource = Resource {
+    id: "org-members",
+    singular: "Member",
+    plural: "Members",
+    section: Section::Manage,
+    collection: ep::ORGANIZATION_MEMBERS,
+    item: Some(ep::USER),
+    shape: Shape::Array,
+    fixed_params: &[],
+    key: Key::ID,
+    new_object: None,
+    label: &["/username", "/email", "/id"],
+    columns: USER_COLUMNS,
+    search: Search::Server,
+    ops: Ops::RO.with(Ops::CREATE).with(Ops::DELETE),
+    requirement: KC_26,
+    tabs: &[Tab::Raw],
+    actions: &[
+        Action::new("add", "Add existing user", Verb::Create, Danger::Confirm),
+        Action::new(
+            "delete",
+            "Remove from organization",
+            Verb::Delete,
+            Danger::Confirm,
+        ),
+    ],
+    keywords: &["tenant members"],
+    summary: "Users belonging to this organization.",
+};

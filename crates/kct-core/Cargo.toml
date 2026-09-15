@@ -1,0 +1,18 @@
+[package]
+name = "kct-core"
+description = "Pure domain model, ports and resource catalog for the Keycloak TUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+async-trait.workspace = true
+chrono.workspace = true
+base64.workspace = true
+
+[dev-dependencies]
+tokio = { workspace = true }
