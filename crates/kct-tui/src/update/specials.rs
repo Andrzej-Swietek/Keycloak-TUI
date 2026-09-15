@@ -33,7 +33,8 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         | "pick-client-for-role"
         | "add-composite"
         | "set-execution-requirement"
-        | "add-execution") => super::picker::open(model, action),
+        | "add-execution"
+        | "move-group") => super::picker::open(model, action),
         "add-sub-flow" => super::pick_flow::ask_sub_flow(model),
         "reset-password" => ask_password(model),
         "partial-export" => super::transfer::export(model, action),

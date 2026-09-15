@@ -9,7 +9,7 @@ use crate::model::{Model, Overlay, Picker};
 use crate::msg::{Fetch, Notice};
 
 use super::commit::commit;
-use super::{pick_flow, pick_roles, pick_specs, transition::Transition};
+use super::{pick_flow, pick_groups, pick_roles, pick_specs, transition::Transition};
 
 /// Open a picker for one of the actions that grant or revoke something.
 #[must_use]
@@ -30,6 +30,7 @@ pub fn open_with(model: Model, action: &'static str, extras: &pick_roles::Extras
         "add-composite" => pick_roles::add_composite(&model),
         "set-execution-requirement" => pick_roles::set_requirement(&model),
         "add-execution" => pick_flow::add_execution(&model),
+        "move-group" => pick_groups::move_group(&model),
         _ => return Transition::pure(model),
     };
 
@@ -43,6 +44,7 @@ pub fn open_with(model: Model, action: &'static str, extras: &pick_roles::Extras
     let (model, token) = model.issue_token();
 
     let require = std::mem::take(&mut spec.require);
+    let without: Arc<[String]> = Arc::from(std::mem::take(&mut spec.without));
     let inline = spec.options.take();
     let load = |fetch, path| Effect::Load {
         token,
@@ -55,6 +57,7 @@ pub fn open_with(model: Model, action: &'static str, extras: &pick_roles::Extras
     if let Some(options) = inline {
         let picker = Picker::loading(spec.title, spec.label, spec.commit, token)
             .requiring(require)
+            .with_exclusions(without)
             .with_options(Arc::from(options));
         return Transition::pure(model.with_overlay(Overlay::picker(picker)));
     }
@@ -69,7 +72,9 @@ pub fn open_with(model: Model, action: &'static str, extras: &pick_roles::Extras
 
     Transition::many(
         model.with_overlay(Overlay::picker(
-            Picker::loading(spec.title, spec.label, spec.commit, token).requiring(require),
+            Picker::loading(spec.title, spec.label, spec.commit, token)
+                .requiring(require)
+                .with_exclusions(without),
         )),
         effects,
     )

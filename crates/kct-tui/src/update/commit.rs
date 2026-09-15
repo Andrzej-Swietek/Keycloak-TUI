@@ -1,6 +1,5 @@
 use serde_json::Value;
 
-use crate::effect::Effect;
 use crate::model::{Commit, Model, Picker};
 
 use super::pick_roles;
@@ -34,80 +33,7 @@ pub(super) fn commit(model: Model, picker: &Picker) -> Transition {
         return open_with(model.without_overlay(), next, &extras);
     }
 
-    let effects = match &picker.commit {
-        Commit::Batch {
-            method,
-            path,
-            title,
-        } => vec![Effect::Call {
-            method: *method,
-            path: path.clone(),
-            query: Vec::new(),
-            body: Some(Value::Array(chosen)),
-            title: format!("{title}: {labels}"),
-        }],
-        Commit::Chain { .. } => Vec::new(),
-        Commit::Replace {
-            method,
-            path,
-            base,
-            field,
-            from,
-            title,
-        } => chosen
-            .first()
-            .and_then(|option| option.get(*from).cloned())
-            .map(|value| Effect::Call {
-                method: *method,
-                path: path.clone(),
-                query: Vec::new(),
-                body: Some(kct_core::json::set_at(
-                    base.clone(),
-                    &format!("/{field}"),
-                    value,
-                )),
-                title: format!("{title}: {labels}"),
-            })
-            .into_iter()
-            .collect(),
-        Commit::EachBody {
-            method,
-            path,
-            field,
-            from,
-            title,
-        } => chosen
-            .iter()
-            .filter_map(|option| option.get(*from).cloned())
-            .map(|value| Effect::Call {
-                method: *method,
-                path: path.clone(),
-                query: Vec::new(),
-                body: Some(kct_core::json::set_at(
-                    Value::Object(serde_json::Map::new()),
-                    &format!("/{field}"),
-                    value,
-                )),
-                title: format!("{title}: {labels}"),
-            })
-            .collect(),
-        Commit::Each {
-            method,
-            base,
-            key,
-            title,
-        } => chosen
-            .iter()
-            .filter_map(|option| option.get(*key).and_then(Value::as_str))
-            .map(|id| Effect::Call {
-                method: *method,
-                path: base.child(id),
-                query: Vec::new(),
-                body: None,
-                title: format!("{title}: {labels}"),
-            })
-            .collect(),
-    };
+    let effects = super::requests::requests(&picker.commit, &chosen, &labels);
 
     Transition::many(model.without_overlay(), effects)
 }

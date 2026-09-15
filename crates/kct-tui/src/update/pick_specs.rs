@@ -14,6 +14,8 @@ pub(crate) struct Spec {
     pub source: ApiPath,
     /// Fetched separately and subtracted from the candidates.
     pub exclude: Vec<ApiPath>,
+    /// Ids to drop without a request.
+    pub without: Vec<String>,
     pub label: &'static [&'static str],
     pub commit: Commit,
 }
@@ -62,6 +64,7 @@ pub(super) fn assign_role(model: &Model, remove: bool) -> Result<Spec> {
         options: None,
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         source: if remove {
             assigned.clone()
         } else {
@@ -89,6 +92,7 @@ pub(super) fn join_group(model: &Model) -> Result<Spec> {
         options: None,
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         source: ep::GROUPS.resolve(&PathParams::realm(&*model.session.realm))?,
         label: &["/path", "/name"],
         commit: Commit::Each {
@@ -131,6 +135,7 @@ pub(super) fn add_client_scope(model: &Model) -> Result<Spec> {
         },
         options: None,
         require: vec![("/protocol", client_protocol(model))],
+        without: Vec::new(),
         source: ep::CLIENT_SCOPES.resolve(&PathParams::realm(&*model.session.realm))?,
         // A scope is default *or* optional, never both: Keycloak answers a PUT that would
         // cross the two with 204 and silently does nothing, so offer neither set.

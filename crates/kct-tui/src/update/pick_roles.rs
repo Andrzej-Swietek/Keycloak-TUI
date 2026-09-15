@@ -19,6 +19,7 @@ pub(super) fn pick_client(model: &Model) -> Result<Spec> {
         options: None,
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         source: ep::CLIENTS.resolve(&PathParams::realm(&*model.session.realm))?,
         label: &["/clientId", "/name"],
         commit: Commit::Chain {
@@ -47,6 +48,7 @@ pub(super) fn assign_client_role(model: &Model, extras: &Extras) -> Result<Spec>
         options: None,
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         source: ep::ROLE_MAPPINGS_CLIENT_AVAILABLE.resolve(&params)?,
         label: &["/name"],
         commit: Commit::Batch {
@@ -81,6 +83,7 @@ pub(super) fn add_composite(model: &Model) -> Result<Spec> {
         options: None,
         require: Vec::new(),
         exclude: vec![composites.clone()],
+        without: Vec::new(),
         source: ep::ROLES.resolve(&PathParams::realm(&*model.session.realm))?,
         label: &["/name"],
         commit: Commit::Batch {
@@ -139,6 +142,7 @@ pub(super) fn set_requirement(model: &Model) -> Result<Spec> {
         options: Some(choices),
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         // The choices are already in hand, so the picker needs no fetch.
         source: ep::AUTH_FLOW_EXECUTIONS.resolve(&params)?,
         label: &["/name"],

@@ -27,6 +27,10 @@ pub(crate) const REALM_GENERAL_FIELDS: &[Field] = &[
         "/adminPermissionsEnabled",
         FieldKind::Bool,
     )
+    .help(
+        "Switching this on creates a client named `admin-permissions`; the grants themselves \
+         are its authorization permissions.",
+    )
     .needs(KC_26_2),
     Field::new(
         "Default signature algorithm",

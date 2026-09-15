@@ -74,6 +74,13 @@ pub(crate) const GROUPS: Resource = Resource {
             Danger::Confirm,
         )
         .keywords(&["client role", "grant", "application role", "rbac"]),
+        Action::new(
+            "move",
+            "Move group under another",
+            Verb::Special("move-group"),
+            Danger::Confirm,
+        )
+        .keywords(&["reparent", "nest", "subgroup", "move"]),
         Action::new("edit", "Edit group", Verb::Edit, Danger::Confirm),
         Action::new("delete", "Delete group", Verb::Delete, Danger::Destructive)
             .keywords(&["remove", "drop subtree"]),

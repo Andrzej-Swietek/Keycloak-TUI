@@ -139,3 +139,48 @@ fn adding_a_sub_flow_posts_the_alias_that_was_typed() {
         other => panic!("expected one sub-flow creation, got {other:?}"),
     }
 }
+
+#[test]
+fn moving_a_group_never_offers_the_group_itself() {
+    use crate::model::List;
+
+    let groups = kct_core::resources::by_id("groups").unwrap();
+    let action = groups
+        .actions
+        .iter()
+        .find(|action| action.id == "move")
+        .expect("a group has to be reparentable");
+
+    let rows = vec![json!({"id": "g1", "name": "platform", "path": "/platform"})];
+    let model = Model {
+        list: List {
+            rows: Arc::from(rows.clone()),
+            visible: Arc::from(vec![0]),
+            envelope: Arc::new(json!(rows)),
+            ..List::default()
+        },
+        ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), groups)
+    };
+
+    let opened = super::actions::run(model, action).model;
+    let Some(Overlay::Picker(picker)) = opened.overlay else {
+        panic!("no picker opened")
+    };
+
+    assert!(
+        picker.excluded.contains(&"g1".to_owned()),
+        "a group cannot become its own parent: {:?}",
+        picker.excluded
+    );
+    match &picker.commit {
+        crate::model::Commit::EachUnder { suffix, body, .. } => {
+            assert_eq!(*suffix, "children");
+            assert_eq!(
+                body["name"],
+                json!("platform"),
+                "Keycloak answers 400 to a move body without the name"
+            );
+        }
+        other => panic!("expected a move, got {other:?}"),
+    }
+}

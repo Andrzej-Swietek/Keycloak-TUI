@@ -39,6 +39,16 @@ pub enum Commit {
         from: &'static str,
         title: String,
     },
+    /// One request per chosen object, sent to a sub-path of it with a fixed body. Moving a
+    /// group posts the group's own representation under the chosen parent.
+    EachUnder {
+        method: Method,
+        base: ApiPath,
+        key: &'static str,
+        suffix: &'static str,
+        body: Value,
+        title: String,
+    },
     /// One request per chosen object, addressed by its id.
     Each {
         method: Method,

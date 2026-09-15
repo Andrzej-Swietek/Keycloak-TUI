@@ -25,6 +25,7 @@ pub(super) fn add_execution(model: &Model) -> Result<Spec> {
         options: None,
         require: Vec::new(),
         exclude: Vec::new(),
+        without: Vec::new(),
         source: ep::AUTH_AUTHENTICATOR_PROVIDERS.resolve(&params)?,
         label: &["/displayName", "/id"],
         commit: Commit::EachBody {

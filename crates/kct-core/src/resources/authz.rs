@@ -140,6 +140,13 @@ pub(crate) const CLIENT_AUTHZ_PERMISSIONS: Resource = Resource {
             Danger::Destructive,
         ),
     ],
-    keywords: &["resource permission", "scope permission"],
+    keywords: &[
+        "resource permission",
+        "scope permission",
+        "fine-grained admin permissions",
+        "fgap",
+        "admin-permissions",
+        "delegated admin",
+    ],
     summary: "Bindings of policies to resources and scopes.",
 };
