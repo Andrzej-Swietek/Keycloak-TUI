@@ -44,7 +44,10 @@ pub fn custom<'a>(art: &Art) -> Portrait<'a> {
         .map(|row| {
             paint(
                 art.row(row).iter().copied(),
-                art.row(row + 1).iter().copied().chain(std::iter::repeat(None)),
+                art.row(row + 1)
+                    .iter()
+                    .copied()
+                    .chain(std::iter::repeat(None)),
             )
         })
         .collect();

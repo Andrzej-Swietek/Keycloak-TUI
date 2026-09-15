@@ -93,9 +93,11 @@ pub fn mascots(model: Model, scan: crate::view::Scan) -> Transition {
         1 => "loaded 1 custom mascot".to_owned(),
         many => format!("loaded {many} custom mascots"),
     };
-    let model = problems.iter().fold(model.noticed(Notice::info(said)), |model, problem| {
-        model.noticed(Notice::warning(problem.clone()))
-    });
+    let model = problems
+        .iter()
+        .fold(model.noticed(Notice::info(said)), |model, problem| {
+            model.noticed(Notice::warning(problem.clone()))
+        });
     Transition::pure(model)
 }
 

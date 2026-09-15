@@ -32,10 +32,12 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         | "add-client-scope"
         | "pick-client-for-role"
         | "add-composite"
-        | "set-execution-requirement") => super::picker::open(model, action),
+        | "set-execution-requirement"
+        | "add-execution") => super::picker::open(model, action),
+        "add-sub-flow" => super::pick_flow::ask_sub_flow(model),
         "reset-password" => ask_password(model),
-        "partial-export" => export(model, action),
-        "partial-import" => ask_import(model),
+        "partial-export" => super::transfer::export(model, action),
+        "partial-import" => super::transfer::ask_import(model),
         "token-for-client" => super::tokens::token_for_client(model),
         "regenerate-secret" => item_post(model, action, "client-secret"),
         "service-account-user" => fetch_item(model, action, "service-account-user"),
@@ -54,18 +56,6 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
 }
 
 /// Ask where the realm representation lives before touching anything.
-fn ask_import(model: Model) -> Transition {
-    Transition::pure(model.with_overlay(Overlay::Prompt(Prompt {
-        title: Arc::from("Partial import"),
-        help: Arc::from(
-            "Path to a realm export. Objects that already exist are SKIPPED, never overwritten.",
-        ),
-        input: TextInput::default(),
-        secret: false,
-        ask: Ask::ImportFrom,
-    })))
-}
-
 fn switch_realm(model: Model) -> Transition {
     match actions::selection(&model) {
         Some((realm, _)) => nav::switch_realm(model, realm),
@@ -85,27 +75,6 @@ fn ask_password(model: Model) -> Transition {
         secret: true,
         ask: Ask::SetPassword { temporary: true },
     })))
-}
-
-fn export(model: Model, action: &'static Action) -> Transition {
-    let plan = |model: &Model| -> Result<Effect> {
-        Ok(Effect::Fetch {
-            method: Method::Post,
-            path: ep::PARTIAL_EXPORT.resolve(&PathParams::realm(&*model.session.realm))?,
-            query: vec![
-                ("exportClients".to_owned(), "true".to_owned()),
-                ("exportGroupsAndRoles".to_owned(), "true".to_owned()),
-            ],
-            body: None,
-            title: format!("Export · {}", model.session.realm),
-        })
-    };
-    planned(
-        model,
-        action,
-        "Export this realm's clients, groups and roles? Secrets are redacted by Keycloak.",
-        plan,
-    )
 }
 
 fn unlock(model: Model) -> Transition {

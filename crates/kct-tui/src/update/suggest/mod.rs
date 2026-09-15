@@ -73,7 +73,11 @@ fn listed(values: &[&str]) -> Vec<String> {
 
 /// Prefer what the server reports; fall back to the documented list only when it says nothing.
 fn or_else(live: Vec<String>, fallback: &[&str]) -> Vec<String> {
-    if live.is_empty() { listed(fallback) } else { live }
+    if live.is_empty() {
+        listed(fallback)
+    } else {
+        live
+    }
 }
 
 /// Narrow suggestions by what has been typed so far, keeping the declared order.

@@ -108,8 +108,15 @@ fn a_panel_is_only_as_tall_as_the_character_in_it() {
     // for nothing.
     let bust = Character::Cat.design().top();
     let figure = Character::Miku.design().top();
-    assert!(bust > figure, "a bust should start lower than a full figure");
-    assert_eq!(bust % 2, 0, "an odd start would pair pixels with the wrong neighbour");
+    assert!(
+        bust > figure,
+        "a bust should start lower than a full figure"
+    );
+    assert_eq!(
+        bust % 2,
+        0,
+        "an odd start would pair pixels with the wrong neighbour"
+    );
     assert_eq!(figure % 2, 0);
 }
 

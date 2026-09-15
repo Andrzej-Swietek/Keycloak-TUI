@@ -34,6 +34,10 @@ pub(crate) const CLIENTS: Resource = Resource {
             fields: CLIENT_CAPABILITY_FIELDS,
         },
         Tab::Form {
+            title: "Scope",
+            fields: super::client_scope_fields::CLIENT_SCOPE_FIELDS,
+        },
+        Tab::Form {
             title: "Tokens",
             fields: CLIENT_TOKEN_FIELDS,
         },

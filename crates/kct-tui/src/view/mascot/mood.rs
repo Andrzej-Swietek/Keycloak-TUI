@@ -74,10 +74,10 @@ impl Mood {
                 .unwrap_or_default()
                 .to_owned(),
             Self::Busy => format!("loading {}", model.resource().plural.to_lowercase()),
-            Self::Happy => model.toasts.last().map_or_else(
-                || "saved".to_owned(),
-                |toast| toast.notice.text.clone(),
-            ),
+            Self::Happy => model
+                .toasts
+                .last()
+                .map_or_else(|| "saved".to_owned(), |toast| toast.notice.text.clone()),
             Self::Sly => "writes are suppressed".to_owned(),
             Self::Idle => format!(
                 "{} {}",

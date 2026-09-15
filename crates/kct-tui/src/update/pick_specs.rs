@@ -4,7 +4,7 @@ use kct_core::{ApiPath, Method, Result};
 use crate::model::{Commit, Model};
 
 /// Where a picker gets its candidates, and what confirming does with them.
-pub(super) struct Spec {
+pub(crate) struct Spec {
     pub title: String,
     /// Candidates already in hand. When set, the picker opens without a request — a step's
     /// requirement choices travel with the step itself.

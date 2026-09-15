@@ -51,7 +51,11 @@ fn transparent_pixels_stay_unpainted() {
 
     assert_eq!(art.width, 3);
     assert_eq!(art.height(), 2);
-    assert_eq!(art.row(0)[0], None, "the first column was fully transparent");
+    assert_eq!(
+        art.row(0)[0],
+        None,
+        "the first column was fully transparent"
+    );
     assert!(art.row(0)[1].is_some());
     let _ = std::fs::remove_dir_all(&dir);
 }
@@ -82,7 +86,9 @@ fn art_too_large_for_the_panel_is_reported_rather_than_ignored() {
 
     assert!(scan.found.is_empty());
     assert!(
-        scan.problems.iter().any(|problem| problem.contains("giant")),
+        scan.problems
+            .iter()
+            .any(|problem| problem.contains("giant")),
         "a mascot that silently fails to appear is worse than one that says why: {:?}",
         scan.problems
     );
@@ -100,7 +106,7 @@ fn colours_survive_a_terminal_that_only_does_256() {
         ((0, 255, 0), 46),
     ] {
         assert_eq!(
-            super::load::quantise(rgb.0, rgb.1, rgb.2),
+            super::decode::quantise(rgb.0, rgb.1, rgb.2),
             ratatui::style::Color::Indexed(expected),
             "{rgb:?}"
         );

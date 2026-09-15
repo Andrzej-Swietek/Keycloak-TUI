@@ -45,9 +45,7 @@ impl Prefs {
 
         match position + 1 {
             next if next < builtins => Self::showing(Mascot::Builtin(Character::ALL[next])),
-            next if next < builtins + customs => {
-                Self::showing(Mascot::Custom(next - builtins))
-            }
+            next if next < builtins + customs => Self::showing(Mascot::Custom(next - builtins)),
             _ => Self::hidden(),
         }
     }

@@ -17,7 +17,6 @@ fn page(rows: Vec<serde_json::Value>) -> crate::msg::Page {
     }
 }
 
-
 fn users() -> &'static Resource {
     kct_core::resources::by_id("users").unwrap()
 }

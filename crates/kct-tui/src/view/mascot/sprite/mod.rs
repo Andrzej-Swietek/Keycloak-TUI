@@ -56,7 +56,10 @@ impl Design {
     pub fn top(&self) -> usize {
         self.body
             .iter()
-            .position(|row| row.chars().any(|pixel| pixel != super::palette::TRANSPARENT))
+            .position(|row| {
+                row.chars()
+                    .any(|pixel| pixel != super::palette::TRANSPARENT)
+            })
             .unwrap_or(0)
             & !1
     }

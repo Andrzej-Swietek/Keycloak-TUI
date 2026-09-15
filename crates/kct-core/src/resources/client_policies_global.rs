@@ -20,16 +20,30 @@ pub(crate) const CLIENT_PROFILES_GLOBAL: Resource = Resource {
     label: &["/name"],
     columns: &[
         Column::new("Name", Projection::At("/name"), Width::Flex(2)).toned(Tone::Primary),
-        Column::new("Executors", Projection::Count("/executors"), Width::Fixed(10)),
-        Column::new("Description", Projection::At("/description"), Width::Flex(5))
-            .toned(Tone::Muted),
+        Column::new(
+            "Executors",
+            Projection::Count("/executors"),
+            Width::Fixed(10),
+        ),
+        Column::new(
+            "Description",
+            Projection::At("/description"),
+            Width::Flex(5),
+        )
+        .toned(Tone::Muted),
     ],
     search: Search::Client,
     ops: Ops::RO,
     requirement: Requirement::Feature(features::CLIENT_POLICIES),
     tabs: &[Tab::Raw],
     actions: &[],
-    keywords: &["fapi", "oauth 2.1", "global profile", "conformance", "read only"],
+    keywords: &[
+        "fapi",
+        "oauth 2.1",
+        "global profile",
+        "conformance",
+        "read only",
+    ],
     summary: "Profiles shipped with the server. Reference them by name; they cannot be changed.",
 };
 
@@ -55,8 +69,12 @@ pub(crate) const CLIENT_POLICIES_GLOBAL: Resource = Resource {
             },
             Width::Flex(3),
         ),
-        Column::new("Description", Projection::At("/description"), Width::Flex(4))
-            .toned(Tone::Muted),
+        Column::new(
+            "Description",
+            Projection::At("/description"),
+            Width::Flex(4),
+        )
+        .toned(Tone::Muted),
     ],
     search: Search::Client,
     ops: Ops::RO,

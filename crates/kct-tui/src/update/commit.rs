@@ -70,6 +70,27 @@ pub(super) fn commit(model: Model, picker: &Picker) -> Transition {
             })
             .into_iter()
             .collect(),
+        Commit::EachBody {
+            method,
+            path,
+            field,
+            from,
+            title,
+        } => chosen
+            .iter()
+            .filter_map(|option| option.get(*from).cloned())
+            .map(|value| Effect::Call {
+                method: *method,
+                path: path.clone(),
+                query: Vec::new(),
+                body: Some(kct_core::json::set_at(
+                    Value::Object(serde_json::Map::new()),
+                    &format!("/{field}"),
+                    value,
+                )),
+                title: format!("{title}: {labels}"),
+            })
+            .collect(),
         Commit::Each {
             method,
             base,

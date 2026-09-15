@@ -56,4 +56,3 @@ fn typing_narrows_the_list_without_reordering_it() {
     assert_eq!(matching(&all, "256"), vec![0, 2]);
     assert_eq!(matching(&all, ""), vec![0, 1, 2]);
 }
-

@@ -135,14 +135,14 @@ pub enum Ask {
     Search,
     /// Set a user's password.
     SetPassword { temporary: bool },
-    /// Free-form JSON body for a create.
+    /// A whole representation, pasted, to create as-is.
     CreateJson { resource: &'static str },
+    /// Add a sub-flow of this name to the flow whose executions are open.
+    AddSubFlow,
     /// Write the viewer's contents to this path.
     SaveToFile { body: Arc<str> },
     /// Read a realm representation from this path and partially import it.
     ImportFrom,
-    /// Jump to a row by id.
-    GoToId,
 }
 
 #[derive(Debug, Clone)]

@@ -90,6 +90,38 @@ pub(crate) const REALM_SECURITY_FIELDS: &[Field] = &[
         "/minimumQuickLoginWaitSeconds",
         FieldKind::Seconds,
     ),
+    Field::new("Default role", "/defaultRole/name", FieldKind::ReadOnly)
+        .help("Roles every new user gets. Change its composites on the Realm roles screen."),
+    Field::new(
+        "Required credentials",
+        "/requiredCredentials",
+        FieldKind::List,
+    ),
+    Field::new("SCIM API", "/scimApiEnabled", FieldKind::Bool)
+        .help("Preview in Keycloak 26.7; needs the `scim` feature switched on at startup."),
+    Field::new(
+        "Verifiable credentials",
+        "/verifiableCredentialsEnabled",
+        FieldKind::Bool,
+    ),
+    Field::new(
+        "Brute force strategy",
+        "/bruteForceStrategy",
+        FieldKind::Choice(&["LINEAR", "MULTIPLE"]),
+    )
+    .help("`MULTIPLE` lengthens each temporary lockout; `LINEAR` keeps them the same."),
+    Field::new(
+        "Max temporary lockouts",
+        "/maxTemporaryLockouts",
+        FieldKind::Integer,
+    )
+    .help("Temporary lockouts before the account is disabled permanently. 0 never disables."),
+    Field::new(
+        "Max secondary auth failures",
+        "/maxSecondaryAuthFailures",
+        FieldKind::Integer,
+    )
+    .help("Failures of a second factor counted separately from the password."),
     Field::new(
         "Security headers",
         "/browserSecurityHeaders",

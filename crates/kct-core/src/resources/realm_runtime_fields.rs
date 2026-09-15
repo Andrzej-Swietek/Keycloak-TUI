@@ -2,6 +2,17 @@ use super::prelude::*;
 
 pub(crate) const REALM_SESSION_FIELDS: &[Field] = &[
     Field::new(
+        "Client offline idle (s)",
+        "/clientOfflineSessionIdleTimeout",
+        FieldKind::Seconds,
+    )
+    .help("Overrides the realm offline idle timeout for clients that set their own. 0 defers."),
+    Field::new(
+        "Client offline max (s)",
+        "/clientOfflineSessionMaxLifespan",
+        FieldKind::Seconds,
+    ),
+    Field::new(
         "SSO session idle",
         "/ssoSessionIdleTimeout",
         FieldKind::Seconds,
@@ -125,39 +136,4 @@ pub(crate) const REALM_EMAIL_FIELDS: &[Field] = &[
     Field::stringly("Authentication", "/smtpServer/auth", FieldKind::Bool),
     Field::new("Username", "/smtpServer/user", FieldKind::Text),
     Field::new("Password", "/smtpServer/password", FieldKind::Secret),
-];
-
-pub(crate) const REALM_FLOW_FIELDS: &[Field] = &[
-    Field::new("Browser flow", "/browserFlow", FieldKind::Text),
-    Field::new("Registration flow", "/registrationFlow", FieldKind::Text),
-    Field::new("Direct grant flow", "/directGrantFlow", FieldKind::Text),
-    Field::new(
-        "Reset credentials flow",
-        "/resetCredentialsFlow",
-        FieldKind::Text,
-    ),
-    Field::new(
-        "Client authentication flow",
-        "/clientAuthenticationFlow",
-        FieldKind::Text,
-    ),
-    Field::new(
-        "Docker authentication flow",
-        "/dockerAuthenticationFlow",
-        FieldKind::Text,
-    ),
-    Field::new(
-        "First broker login flow",
-        "/firstBrokerLoginFlow",
-        FieldKind::Text,
-    )
-    .needs(KC_26),
-    Field::new(
-        "OTP policy type",
-        "/otpPolicyType",
-        FieldKind::Choice(&["totp", "hotp"]),
-    ),
-    Field::new("OTP algorithm", "/otpPolicyAlgorithm", FieldKind::Text),
-    Field::new("OTP digits", "/otpPolicyDigits", FieldKind::Integer),
-    Field::new("OTP period", "/otpPolicyPeriod", FieldKind::Seconds),
 ];

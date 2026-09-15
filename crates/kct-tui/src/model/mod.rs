@@ -12,8 +12,8 @@ mod nav;
 mod overlay;
 mod picker;
 mod prefs;
-mod sidebar;
 mod session;
+mod sidebar;
 
 pub use attributes::{Attributes, Column as AttributeColumn, Shape as AttributeShape};
 pub use commit::Commit;
@@ -24,8 +24,8 @@ pub use nav::{Location, Nav};
 pub use overlay::{Ask, Confirm, Overlay, Prompt, Spotlight};
 pub use picker::Picker;
 pub use prefs::{Mascot, Prefs};
-pub use sidebar::{SidebarRow, sidebar_rows};
 pub use session::{Session, UnmanagedAttributes};
+pub use sidebar::{SidebarRow, sidebar_rows};
 
 use std::collections::VecDeque;
 use std::time::Instant;

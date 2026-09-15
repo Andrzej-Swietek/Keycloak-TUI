@@ -6,41 +6,17 @@
 
 use super::{EYE_ROWS, Mood};
 
-const OPEN: [&str; EYE_ROWS] = [
-    "kkkk   kkkk",
-    "Eeee   Eeee",
-    "keek   keek",
-];
+const OPEN: [&str; EYE_ROWS] = ["kkkk   kkkk", "Eeee   Eeee", "keek   keek"];
 
-const BLINK: [&str; EYE_ROWS] = [
-    "           ",
-    "kkkk   kkkk",
-    "           ",
-];
+const BLINK: [&str; EYE_ROWS] = ["           ", "kkkk   kkkk", "           "];
 
-const SMILE: [&str; EYE_ROWS] = [
-    "           ",
-    " kk     kk ",
-    "k  k   k  k",
-];
+const SMILE: [&str; EYE_ROWS] = ["           ", " kk     kk ", "k  k   k  k"];
 
-const WIDE: [&str; EYE_ROWS] = [
-    "kkkk   kkkk",
-    "EEee   eeEE",
-    "keek   keek",
-];
+const WIDE: [&str; EYE_ROWS] = ["kkkk   kkkk", "EEee   eeEE", "keek   keek"];
 
-const WORRY: [&str; EYE_ROWS] = [
-    "k         k",
-    "kkkk   kkkk",
-    " Eee   eeE ",
-];
+const WORRY: [&str; EYE_ROWS] = ["k         k", "kkkk   kkkk", " Eee   eeE "];
 
-const WINK: [&str; EYE_ROWS] = [
-    "kkkk       ",
-    "Eeee    kk ",
-    "keek   k  k",
-];
+const WINK: [&str; EYE_ROWS] = ["kkkk       ", "Eeee    kk ", "keek   k  k"];
 
 const DOT: &str = "     m     ";
 const SMIRK: &str = "    kmk    ";

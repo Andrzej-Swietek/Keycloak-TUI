@@ -8,6 +8,7 @@ mod attributes;
 mod commands;
 mod commit;
 mod confirm;
+mod create_from;
 mod data;
 mod detail;
 mod field_edit;
@@ -17,6 +18,7 @@ mod nav;
 mod nested;
 mod overlay;
 mod parse;
+mod pick_flow;
 mod pick_roles;
 mod pick_specs;
 mod picker;
@@ -28,6 +30,7 @@ mod specials;
 mod spotlight_keys;
 mod suggest;
 mod tokens;
+mod transfer;
 mod transition;
 mod warnings;
 
@@ -90,6 +93,8 @@ mod tests_attributes;
 mod tests_detail;
 #[cfg(test)]
 mod tests_detail_save;
+#[cfg(test)]
+mod tests_flow;
 #[cfg(test)]
 mod tests_picker;
 #[cfg(test)]

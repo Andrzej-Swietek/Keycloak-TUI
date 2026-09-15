@@ -9,6 +9,8 @@ mod authz;
 mod client_fields;
 mod client_policies;
 mod client_policies_global;
+mod client_registration;
+mod client_scope_fields;
 mod client_scopes_sub;
 mod client_subs;
 mod clients;
@@ -25,7 +27,9 @@ mod prelude;
 mod realm;
 mod realm_config;
 mod realm_fields;
+mod realm_flow_fields;
 mod realm_runtime_fields;
+mod realm_webauthn_fields;
 mod registration;
 mod role_mappings;
 mod roles;
@@ -52,6 +56,7 @@ pub static CATALOG: &[Resource] = &[
     authentication::AUTH_FLOWS,
     registration::REQUIRED_ACTIONS,
     registration::CLIENT_INITIAL_ACCESS,
+    client_registration::CLIENT_REGISTRATION_POLICIES,
     realm::REALM_SETTINGS,
     realm_config::REALM_KEYS,
     realm_config::KEY_PROVIDERS,

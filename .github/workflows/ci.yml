@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  check:
+    name: Build, lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+      - name: Documentation links
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: No file over 200 lines
+        run: |
+          over=$(find crates tools -name '*.rs' -o -name '*.py' \
+            | xargs wc -l | awk '$1 > 200 && $2 != "total" { print }')
+          if [ -n "$over" ]; then echo "$over"; exit 1; fi
+
+  doctor:
+    name: Catalog against Keycloak ${{ matrix.keycloak }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        keycloak: ["26.6.1", "26.7.3"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Start Keycloak
+        run: |
+          docker run -d --name kc -p 18080:8080 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
+            -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            quay.io/keycloak/keycloak:${{ matrix.keycloak }} start-dev
+          for _ in $(seq 60); do
+            curl -sf http://localhost:18080/realms/master >/dev/null && break
+            sleep 2
+          done
+
+      - run: cargo build --release
+      - name: Drift report
+        run: ./target/release/kct -s http://localhost:18080 -r master -u admin -p admin doctor
+      - name: Live integration tests
+        run: cargo test -p kct-client --tests
+        env:
+          KCT_TEST_SERVER: http://localhost:18080
+          KCT_TEST_USER: admin
+          KCT_TEST_PASSWORD: admin

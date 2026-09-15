@@ -62,14 +62,20 @@ fn ansi_rows(character: Character, mood: Mood, tick: u64) -> Vec<String> {
     pixels
         .chunks(2)
         .map(|pair| {
-            pair[0].chars().zip(pair[1].chars()).fold(
-                String::new(),
-                |mut acc, (top, bottom)| {
+            pair[0]
+                .chars()
+                .zip(pair[1].chars())
+                .fold(String::new(), |mut acc, (top, bottom)| {
                     // Same glyph choice as `super::paint`: an unpainted pixel, not a
                     // half-block coloured with the terminal default.
-                    let _ = match (palette::is_transparent(top), palette::is_transparent(bottom)) {
+                    let _ = match (
+                        palette::is_transparent(top),
+                        palette::is_transparent(bottom),
+                    ) {
                         (true, true) => acc.write_char(' '),
-                        (true, false) => write!(acc, "\x1b[38;5;{}m\u{2584}\x1b[0m", indexed(bottom)),
+                        (true, false) => {
+                            write!(acc, "\x1b[38;5;{}m\u{2584}\x1b[0m", indexed(bottom))
+                        }
                         (false, true) => write!(acc, "\x1b[38;5;{}m\u{2580}\x1b[0m", indexed(top)),
                         (false, false) => write!(
                             acc,
@@ -79,8 +85,7 @@ fn ansi_rows(character: Character, mood: Mood, tick: u64) -> Vec<String> {
                         ),
                     };
                     acc
-                },
-            )
+                })
         })
         .collect()
 }

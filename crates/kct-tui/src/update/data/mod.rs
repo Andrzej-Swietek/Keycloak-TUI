@@ -102,9 +102,7 @@ fn refresh(model: Model) -> Transition {
         .filter(|(id, _)| !id.is_empty());
 
     match reopen {
-        Some((id, title)) => {
-            nav::reload(model).and_then(|model| nav::open_item(model, id, title))
-        }
+        Some((id, title)) => nav::reload(model).and_then(|model| nav::open_item(model, id, title)),
         None => nav::reload(model),
     }
 }

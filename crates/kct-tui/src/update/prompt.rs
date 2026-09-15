@@ -36,9 +36,39 @@ fn submit(model: Model, state: Prompt) -> Transition {
             },
         ),
         Ask::ImportFrom => import(model, answer),
-        Ask::GoToId | Ask::CreateJson { .. } => {
-            Transition::pure(model.noticed(Notice::info("not wired up yet")))
+        Ask::CreateJson { resource } => {
+            super::create_from::create_from_json(model, resource, &answer)
         }
+        Ask::AddSubFlow => add_sub_flow(model, &answer),
+    }
+}
+
+/// Add an empty sub-flow to the flow whose executions are open.
+fn add_sub_flow(model: Model, alias: &str) -> Transition {
+    let Some(flow) = model.context().params.get("flow").map(ToOwned::to_owned) else {
+        return Transition::pure(
+            model.noticed(Notice::warning("open a flow's executions tab first")),
+        );
+    };
+    let params = PathParams::realm(&*model.session.realm).with("flow", flow);
+
+    match ep::AUTH_FLOW_ADD_SUBFLOW.resolve(&params) {
+        Ok(path) => Transition::with(
+            model,
+            Effect::Call {
+                method: Method::Post,
+                path,
+                query: Vec::new(),
+                body: Some(json!({
+                    "alias": alias,
+                    "type": "basic-flow",
+                    "description": "",
+                    "provider": "registration-page-form",
+                })),
+                title: format!("added sub-flow '{alias}'"),
+            },
+        ),
+        Err(error) => Transition::pure(model.noticed(Notice::from_error("cannot add", &error))),
     }
 }
 
@@ -77,14 +107,11 @@ fn create(
     let draft = resource.draft_new(&name, &model.context().params);
     let title = format!("created {} '{name}'", resource.singular.to_lowercase());
 
-    let (method, body) = match resource.with_item(
-        (*model.list.envelope).clone(),
-        &name,
-        Some(draft.clone()),
-    ) {
-        Some(document) => (Method::Put, document),
-        None => (Method::Post, draft),
-    };
+    let (method, body) =
+        match resource.with_item((*model.list.envelope).clone(), &name, Some(draft.clone())) {
+            Some(document) => (Method::Put, document),
+            None => (Method::Post, draft),
+        };
 
     Transition::with(
         model,

@@ -1,3 +1,4 @@
+mod decode;
 mod load;
 
 use std::sync::Arc;

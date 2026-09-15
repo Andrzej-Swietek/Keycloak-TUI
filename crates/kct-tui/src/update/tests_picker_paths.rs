@@ -8,8 +8,6 @@ use crate::msg::Msg;
 
 use super::{Transition, update};
 
-
-
 /// The path an operator actually takes: highlight a user, press the action, pick a role.
 /// It used to require descending into the role-mapping sub-list first, which nobody found.
 #[test]

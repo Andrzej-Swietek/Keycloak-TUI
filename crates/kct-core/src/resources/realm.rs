@@ -1,8 +1,7 @@
 use super::prelude::*;
 use super::realm_fields::{REALM_GENERAL_FIELDS, REALM_LOGIN_FIELDS, REALM_SECURITY_FIELDS};
 use super::realm_runtime_fields::{
-    REALM_EMAIL_FIELDS, REALM_FLOW_FIELDS, REALM_SESSION_FIELDS, REALM_THEME_FIELDS,
-    REALM_TOKEN_FIELDS,
+    REALM_EMAIL_FIELDS, REALM_SESSION_FIELDS, REALM_THEME_FIELDS, REALM_TOKEN_FIELDS,
 };
 
 pub(crate) const REALM_SETTINGS: Resource = Resource {
@@ -48,7 +47,15 @@ pub(crate) const REALM_SETTINGS: Resource = Resource {
         },
         Tab::Form {
             title: "Flows & OTP",
-            fields: REALM_FLOW_FIELDS,
+            fields: super::realm_flow_fields::REALM_FLOW_FIELDS,
+        },
+        Tab::Form {
+            title: "Passkeys",
+            fields: super::realm_webauthn_fields::WEBAUTHN_PASSWORDLESS_FIELDS,
+        },
+        Tab::Form {
+            title: "Security keys",
+            fields: super::realm_webauthn_fields::WEBAUTHN_FIELDS,
         },
         Tab::Form {
             title: "Email",

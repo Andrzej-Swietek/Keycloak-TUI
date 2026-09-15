@@ -46,8 +46,18 @@ fn hints<'a>(model: &Model) -> Vec<Span<'a>> {
         .chain(Some(Span::styled("commands  ", theme.dim())))
         .chain(hint("/", "filter"))
         .chain(hint("⏎", "open"))
-        .chain(ops.has(Ops::CREATE).then(|| hint("n", "new")).into_iter().flatten())
-        .chain(ops.has(Ops::DELETE).then(|| hint("x", "delete")).into_iter().flatten())
+        .chain(
+            ops.has(Ops::CREATE)
+                .then(|| hint("n", "new"))
+                .into_iter()
+                .flatten(),
+        )
+        .chain(
+            ops.has(Ops::DELETE)
+                .then(|| hint("x", "delete"))
+                .into_iter()
+                .flatten(),
+        )
         .chain(hint("a", "actions"))
         .chain(hint("?", "help"))
         .collect()

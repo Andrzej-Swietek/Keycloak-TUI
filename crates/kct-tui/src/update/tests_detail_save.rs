@@ -39,7 +39,14 @@ fn picking_a_suggestion_is_what_gets_committed() {
     let field = super::visible_fields(&base, &realm.tabs[0])[0];
     let highlighted = update(base, key(KeyCode::Tab)).model;
     assert_eq!(
-        highlighted.detail.as_ref().unwrap().editing.as_ref().unwrap().value(),
+        highlighted
+            .detail
+            .as_ref()
+            .unwrap()
+            .editing
+            .as_ref()
+            .unwrap()
+            .value(),
         "keycloak"
     );
 
@@ -71,7 +78,8 @@ fn saving_an_embedded_item_writes_the_whole_document_back() {
         "unmanagedAttributePolicy": "ENABLED",
     });
     let attributes = kct_core::resources::by_id("user-profile-attributes").unwrap();
-    let edited = json!({"name": "email", "displayName": "E-mail", "permissions": {"edit": ["admin"]}});
+    let edited =
+        json!({"name": "email", "displayName": "E-mail", "permissions": {"edit": ["admin"]}});
 
     let model = Model {
         list: List {
@@ -82,7 +90,10 @@ fn saving_an_embedded_item_writes_the_whole_document_back() {
             draft: edited,
             ..Detail::loaded("email", "email", json!({"name": "email"}))
         }),
-        ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), attributes)
+        ..Model::new(
+            Session::new("https://kc.test", "avsystem", "admin"),
+            attributes,
+        )
     };
 
     let confirming = update(model, key(KeyCode::Char('w'))).model;
@@ -131,7 +142,11 @@ fn a_successful_save_leaves_the_object_open() {
     // `:w` is vim's save, not vim's close.
     let users = kct_core::resources::by_id("users").unwrap();
     let model = Model {
-        detail: Some(crate::model::Detail::loaded("u1", "alice", json!({"id": "u1"}))),
+        detail: Some(crate::model::Detail::loaded(
+            "u1",
+            "alice",
+            json!({"id": "u1"}),
+        )),
         ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), users)
     };
 
@@ -160,7 +175,11 @@ fn a_successful_save_leaves_the_object_open() {
 fn write_quit_returns_to_the_listing() {
     let users = kct_core::resources::by_id("users").unwrap();
     let model = Model {
-        detail: Some(crate::model::Detail::loaded("u1", "alice", json!({"id": "u1"}))),
+        detail: Some(crate::model::Detail::loaded(
+            "u1",
+            "alice",
+            json!({"id": "u1"}),
+        )),
         ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), users)
     }
     .closing_after_save();

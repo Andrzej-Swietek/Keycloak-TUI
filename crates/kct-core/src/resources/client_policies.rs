@@ -22,9 +22,17 @@ pub(crate) const CLIENT_PROFILE_ITEMS: Resource = Resource {
     label: &["/name"],
     columns: &[
         Column::new("Name", Projection::At("/name"), Width::Flex(2)).toned(Tone::Primary),
-        Column::new("Executors", Projection::Count("/executors"), Width::Fixed(10)),
-        Column::new("Description", Projection::At("/description"), Width::Flex(5))
-            .toned(Tone::Muted),
+        Column::new(
+            "Executors",
+            Projection::Count("/executors"),
+            Width::Fixed(10),
+        ),
+        Column::new(
+            "Description",
+            Projection::At("/description"),
+            Width::Flex(5),
+        )
+        .toned(Tone::Muted),
     ],
     search: Search::Client,
     ops: Ops::CRUD,
@@ -86,9 +94,17 @@ pub(crate) const CLIENT_POLICY_ITEMS: Resource = Resource {
             },
             Width::Flex(3),
         ),
-        Column::new("Conditions", Projection::Count("/conditions"), Width::Fixed(11)),
-        Column::new("Description", Projection::At("/description"), Width::Flex(3))
-            .toned(Tone::Muted),
+        Column::new(
+            "Conditions",
+            Projection::Count("/conditions"),
+            Width::Fixed(11),
+        ),
+        Column::new(
+            "Description",
+            Projection::At("/description"),
+            Width::Flex(3),
+        )
+        .toned(Tone::Muted),
     ],
     search: Search::Client,
     ops: Ops::CRUD,

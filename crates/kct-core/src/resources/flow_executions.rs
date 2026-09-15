@@ -37,6 +37,20 @@ pub(crate) const FLOW_EXECUTIONS: Resource = Resource {
     tabs: &[Tab::Raw],
     actions: &[
         Action::new(
+            "add-step",
+            "Add a step",
+            Verb::Special("add-execution"),
+            Danger::Confirm,
+        )
+        .keywords(&["authenticator", "execution", "add step", "insert"]),
+        Action::new(
+            "add-subflow",
+            "Add a sub-flow",
+            Verb::Special("add-sub-flow"),
+            Danger::Confirm,
+        )
+        .keywords(&["nested flow", "conditional", "group of steps"]),
+        Action::new(
             "set-requirement",
             "Change requirement",
             Verb::Special("set-execution-requirement"),

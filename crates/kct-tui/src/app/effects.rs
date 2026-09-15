@@ -135,7 +135,6 @@ pub(super) fn log_status(
     });
 }
 
-
 /// The three realm-scoped probes that run once at startup.
 ///
 /// They share a shape — resolve a path, fetch it, log it, send the answer — and a failure on
@@ -158,8 +157,8 @@ async fn detect(effect: Effect, gateway: &Arc<dyn Gateway>, tx: &UnboundedSender
     let _ = tx.send(match effect {
         Effect::DetectUserProfile { .. } => Msg::UserProfile(result),
         Effect::DetectRealmFlags { .. } => Msg::RealmFlags(result),
-        _ => Msg::AuthFlows(result.map(|body| {
-            Arc::from(body.as_array().cloned().unwrap_or_default().as_slice())
-        })),
+        _ => Msg::AuthFlows(
+            result.map(|body| Arc::from(body.as_array().cloned().unwrap_or_default().as_slice())),
+        ),
     });
 }

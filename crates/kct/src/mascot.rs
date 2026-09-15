@@ -39,7 +39,11 @@ pub fn show(grid: bool) {
 
     if grid {
         for character in Character::ALL {
-            println!("{}\n{}\n", character.name(), mascot_preview::grid(character));
+            println!(
+                "{}\n{}\n",
+                character.name(),
+                mascot_preview::grid(character)
+            );
         }
     } else {
         println!("{}", mascot_preview::sheet());

@@ -30,6 +30,15 @@ pub enum Commit {
         from: &'static str,
         title: String,
     },
+    /// One request per chosen object, each carrying `{field: chosen[from]}` as its body.
+    /// Adding steps to an authentication flow works this way.
+    EachBody {
+        method: Method,
+        path: ApiPath,
+        field: &'static str,
+        from: &'static str,
+        title: String,
+    },
     /// One request per chosen object, addressed by its id.
     Each {
         method: Method,
