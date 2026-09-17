@@ -14,7 +14,7 @@ jobs:
     name: Build, lint and test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -34,6 +34,7 @@ jobs:
             | xargs wc -l | awk '$1 > 200 && $2 != "total" { print }')
           if [ -n "$over" ]; then echo "$over"; exit 1; fi
 
+
   doctor:
     name: Catalog against Keycloak ${{ matrix.keycloak }}
     runs-on: ubuntu-latest
@@ -42,7 +43,7 @@ jobs:
       matrix:
         keycloak: ["26.6.1", "26.7.3"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 

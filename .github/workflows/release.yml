@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  # A tag push does not match ci.yml's branch filter, so nothing else would have checked
+  # this commit. Nothing is published until it passes.
+  check:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace
+
+  glibc:
+    name: x86_64 glibc
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build --release --locked -p kct
+      - name: Package
+        run: |
+          tar -czf kct-${{ github.ref_name }}-x86_64-linux-gnu.tar.gz -C target/release kct
+          sha256sum kct-${{ github.ref_name }}-x86_64-linux-gnu.tar.gz \
+            > kct-${{ github.ref_name }}-x86_64-linux-gnu.tar.gz.sha256
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: kct-${{ github.ref_name }}-x86_64-linux-gnu.tar.gz*
+          generate_release_notes: true
+
+  musl:
+    name: x86_64 musl (static)
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Built inside Alpine rather than cross-compiled: `aws-lc-sys` needs a C toolchain
+      # that matches the target libc. Checkout runs on the host because the runner's Node
+      # is glibc-linked and will not execute in an Alpine container.
+      - name: Build
+        run: |
+          docker run --rm -v "$PWD":/w -w /w rust:1-alpine sh -c '
+            apk add --no-cache musl-dev cmake make g++ perl
+            cargo build --release --locked -p kct'
+
+      - name: Package
+        run: |
+          sudo chown -R "$USER" target
+          tar -czf kct-${{ github.ref_name }}-x86_64-linux-musl.tar.gz -C target/release kct
+          sha256sum kct-${{ github.ref_name }}-x86_64-linux-musl.tar.gz \
+            > kct-${{ github.ref_name }}-x86_64-linux-musl.tar.gz.sha256
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: kct-${{ github.ref_name }}-x86_64-linux-musl.tar.gz*
+          generate_release_notes: true
