@@ -1,24 +1,9 @@
 use kct_core::path::{PathParams, endpoints as ep};
-use kct_core::{ApiPath, Method, Result};
+use kct_core::{Method, Result};
 
 use crate::model::{Commit, Model};
 
-/// Where a picker gets its candidates, and what confirming does with them.
-pub(crate) struct Spec {
-    pub title: String,
-    /// Candidates already in hand. When set, the picker opens without a request — a step's
-    /// requirement choices travel with the step itself.
-    pub options: Option<Vec<serde_json::Value>>,
-    /// Candidate fields that must match for the server to accept the pairing.
-    pub require: Vec<(&'static str, String)>,
-    pub source: ApiPath,
-    /// Fetched separately and subtracted from the candidates.
-    pub exclude: Vec<ApiPath>,
-    /// Ids to drop without a request.
-    pub without: Vec<String>,
-    pub label: &'static [&'static str],
-    pub commit: Commit,
-}
+use super::pick_spec::Spec;
 
 /// Who the role mapping is for.
 ///
@@ -54,24 +39,19 @@ pub(super) fn assign_role(model: &Model, remove: bool) -> Result<Spec> {
 
     let assigned = ep::ROLE_MAPPINGS_REALM.resolve(&params)?;
 
-    Ok(Spec {
-        title: if remove {
+    Ok(Spec::from(
+        if remove {
             "Remove realm roles".to_owned()
         } else {
             "Assign realm roles".to_owned()
         },
-        // Removing picks from what is assigned; granting picks from what is not.
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        source: if remove {
+        if remove {
             assigned.clone()
         } else {
             ep::ROLE_MAPPINGS_REALM_AVAILABLE.resolve(&params)?
         },
-        label: &["/name"],
-        commit: Commit::Batch {
+        &["/name"],
+        Commit::Batch {
             method: if remove { Method::Delete } else { Method::Post },
             path: assigned,
             title: if remove {
@@ -80,28 +60,24 @@ pub(super) fn assign_role(model: &Model, remove: bool) -> Result<Spec> {
                 "roles assigned".to_owned()
             },
         },
-    })
+    ))
 }
 
 pub(super) fn join_group(model: &Model) -> Result<Spec> {
     let user = user_id(model)?;
     let params = PathParams::realm(&*model.session.realm).with("user", user);
 
-    Ok(Spec {
-        title: "Join groups".to_owned(),
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        source: ep::GROUPS.resolve(&PathParams::realm(&*model.session.realm))?,
-        label: &["/path", "/name"],
-        commit: Commit::Each {
+    Ok(Spec::from(
+        "Join groups".to_owned(),
+        ep::GROUPS.resolve(&PathParams::realm(&*model.session.realm))?,
+        &["/path", "/name"],
+        Commit::Each {
             method: Method::Put,
             base: ep::USER_GROUPS.resolve(&params)?,
             key: "id",
             title: "group membership updated".to_owned(),
         },
-    })
+    ))
 }
 
 /// The parent screen decides whether a scope lands in the default or optional set.
@@ -127,30 +103,28 @@ pub(super) fn add_client_scope(model: &Model) -> Result<Spec> {
         ep::CLIENT_DEFAULT_SCOPES.resolve(&params)?
     };
 
-    Ok(Spec {
-        title: if optional {
+    Ok(Spec::from(
+        if optional {
             "Add optional client scopes".to_owned()
         } else {
             "Add default client scopes".to_owned()
         },
-        options: None,
-        require: vec![("/protocol", client_protocol(model))],
-        without: Vec::new(),
-        source: ep::CLIENT_SCOPES.resolve(&PathParams::realm(&*model.session.realm))?,
-        // A scope is default *or* optional, never both: Keycloak answers a PUT that would
-        // cross the two with 204 and silently does nothing, so offer neither set.
-        exclude: vec![
-            ep::CLIENT_DEFAULT_SCOPES.resolve(&params)?,
-            ep::CLIENT_OPTIONAL_SCOPES.resolve(&params)?,
-        ],
-        label: &["/name"],
-        commit: Commit::Each {
+        ep::CLIENT_SCOPES.resolve(&PathParams::realm(&*model.session.realm))?,
+        &["/name"],
+        Commit::Each {
             method: Method::Put,
             base,
             key: "id",
             title: "client scope added".to_owned(),
         },
-    })
+    )
+    .requiring("/protocol", client_protocol(model))
+    // A scope is default *or* optional, never both: Keycloak answers a PUT that would cross
+    // the two with 204 and silently does nothing, so offer neither set.
+    .excluding(vec![
+        ep::CLIENT_DEFAULT_SCOPES.resolve(&params)?,
+        ep::CLIENT_OPTIONAL_SCOPES.resolve(&params)?,
+    ]))
 }
 
 /// The protocol of the client in view, which a scope must share to be attachable.
@@ -174,4 +148,34 @@ fn user_id(model: &Model) -> Result<String> {
         .map(ToOwned::to_owned)
         .or_else(|| super::actions::selection(model).map(|(id, _)| id))
         .ok_or_else(|| kct_core::Error::config("select a user first"))
+}
+
+/// Required actions to send a user by e-mail.
+pub(super) fn execute_actions_email(model: &Model) -> Result<Spec> {
+    let (id, label) = super::actions::selection(model)
+        .ok_or_else(|| kct_core::Error::config("select a user first"))?;
+    let params = PathParams::realm(&*model.session.realm).with("user", id);
+
+    Ok(Spec::from(
+        format!("E-mail {label} these actions"),
+        ep::USER_EXECUTE_ACTIONS_EMAIL.resolve(&params)?,
+        &["/id"],
+        Commit::Batch {
+            method: Method::Put,
+            path: ep::USER_EXECUTE_ACTIONS_EMAIL.resolve(&params)?,
+            title: format!("e-mailed {label}"),
+        },
+    )
+    .of(super::suggest::for_field(
+        &kct_core::catalog::Field::new(
+            "Required actions",
+            "/requiredActions",
+            kct_core::catalog::FieldKind::List,
+        ),
+        model.resource(),
+        &model.session,
+    )
+    .into_iter()
+    .map(|action| serde_json::json!({ "id": action }))
+    .collect()))
 }

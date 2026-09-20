@@ -5,7 +5,7 @@ use kct_core::{Method, Result};
 
 use crate::model::{Commit, Model};
 
-use super::pick_specs::Spec;
+use super::pick_spec::Spec;
 
 /// Groups the selected group can be moved under.
 ///
@@ -21,16 +21,11 @@ pub(super) fn move_group(model: &Model) -> Result<Spec> {
     let params = PathParams::realm(&*model.session.realm);
     let groups = ep::GROUPS.resolve(&params)?;
 
-    Ok(Spec {
-        title: format!("Move {label} under"),
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        source: groups.clone(),
-        label: &["/path", "/name"],
-        // A group cannot become its own parent.
-        without: vec![id],
-        commit: Commit::EachUnder {
+    Ok(Spec::from(
+        format!("Move {label} under"),
+        groups.clone(),
+        &["/path", "/name"],
+        Commit::EachUnder {
             method: Method::Post,
             base: groups,
             key: "id",
@@ -38,5 +33,7 @@ pub(super) fn move_group(model: &Model) -> Result<Spec> {
             body: representation,
             title: format!("moved {label}"),
         },
-    })
+    )
+    // A group cannot become its own parent.
+    .without(vec![id]))
 }

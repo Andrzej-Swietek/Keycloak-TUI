@@ -137,6 +137,12 @@ pub enum Ask {
     SetPassword { temporary: bool },
     /// A whole representation, pasted, to create as-is.
     CreateJson { resource: &'static str },
+    /// Post `{field: answer}` to a path a previous step resolved.
+    PostNamed {
+        path: kct_core::ApiPath,
+        field: &'static str,
+        singular: &'static str,
+    },
     /// Add a sub-flow of this name to the flow whose executions are open.
     AddSubFlow,
     /// Write the viewer's contents to this path.

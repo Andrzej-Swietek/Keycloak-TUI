@@ -39,6 +39,14 @@ pub enum Commit {
         from: &'static str,
         title: String,
     },
+    /// Choosing writes nothing: it asks for a name, to create under the chosen type. An
+    /// authorization policy's type is part of its URL, including one a deployed SPI adds.
+    Name {
+        base: ApiPath,
+        from: &'static str,
+        title: &'static str,
+        singular: &'static str,
+    },
     /// One request per chosen object, sent to a sub-path of it with a fixed body. Moving a
     /// group posts the group's own representation under the chosen parent.
     EachUnder {

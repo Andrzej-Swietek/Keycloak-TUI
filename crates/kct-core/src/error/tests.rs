@@ -73,3 +73,20 @@ fn only_get_is_treated_as_non_mutating() {
         assert!(method.is_mutating(), "{method} must count as a write");
     }
 }
+
+#[test]
+fn a_policy_type_that_needs_more_than_a_name_says_so() {
+    // Keycloak answers 500 with "consult the server log" for a group or client policy created
+    // with only a name; the generic 500 hint points at user federation, which is wrong here.
+    let error = Error::Api {
+        status: 500,
+        method: Method::Post,
+        path: "/admin/realms/avsystem/clients/c1/authz/resource-server/policy/group".to_owned(),
+        message: "unknown_error".to_owned(),
+        detail: None,
+    };
+
+    let hint = hint::for_error(&error).expect("a 500 always carries a hint");
+    assert!(hint.contains("policy type"), "{hint}");
+    assert!(!hint.contains("federation"), "{hint}");
+}

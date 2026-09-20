@@ -56,3 +56,47 @@ fn typing_narrows_the_list_without_reordering_it() {
     assert_eq!(matching(&all, "256"), vec![0, 2]);
     assert_eq!(matching(&all, ""), vec![0, 1, 2]);
 }
+
+#[test]
+fn a_provider_a_deployed_extension_registers_is_offered() {
+    // An SPI provider the deployment adds reaches the operator without a code change: the
+    // suggestion reads what the server reports, not a list compiled in here.
+    let session = Session {
+        profile: ServerProfile::from_server_info(json!({
+            "systemInfo": {"version": "26.6.1"},
+            "providers": {
+                "eventsListener": {
+                    "providers": {
+                        "jboss-logging": {},
+                        "group-permission-cascade": {},
+                    }
+                },
+                "policy": {"providers": {"role": {}, "group-hierarchy": {}}},
+            },
+            "protocolMapperTypes": {
+                "openid-connect": [{"id": "oidc-usermodel-attribute-mapper"}, {"id": "acme-custom-mapper"}]
+            },
+        })),
+        ..Session::new("https://kc", "avsystem", "admin")
+    };
+
+    let listeners = for_field(
+        &Field::new("Event listeners", "/eventsListeners", FieldKind::List),
+        realm(),
+        &session,
+    );
+    assert!(
+        listeners.contains(&"group-permission-cascade".to_owned()),
+        "{listeners:?}"
+    );
+
+    let mappers = for_field(
+        &Field::new("Mapper type", "/protocolMapper", FieldKind::Text),
+        realm(),
+        &session,
+    );
+    assert!(
+        mappers.contains(&"acme-custom-mapper".to_owned()),
+        "{mappers:?}"
+    );
+}

@@ -72,17 +72,16 @@ pub(super) fn save(model: Model, detail: Detail) -> Transition {
         )
         .unwrap_or_else(|| detail.draft.clone());
 
-    let effect = Effect::Call {
-        method: Method::Put,
-        path: planned.path,
-        query: Vec::new(),
-        body: Some(body),
-        title: format!(
+    let effect = Effect::call(
+        Method::Put,
+        planned.path,
+        Some(body),
+        format!(
             "saved {} '{}'",
             resource.singular.to_lowercase(),
             detail.title
         ),
-    };
+    );
 
     let changes = detail.pending_changes();
     let body = warnings::before_save(&model, &changes)

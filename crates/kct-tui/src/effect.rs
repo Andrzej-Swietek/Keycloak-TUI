@@ -82,3 +82,22 @@ pub enum Effect {
     },
     Quit,
 }
+
+impl Effect {
+    /// A write with no query string, which is every write but the federation syncs.
+    #[must_use]
+    pub fn call(
+        method: Method,
+        path: ApiPath,
+        body: Option<Value>,
+        title: impl Into<String>,
+    ) -> Self {
+        Self::Call {
+            method,
+            path,
+            query: Vec::new(),
+            body,
+            title: title.into(),
+        }
+    }
+}

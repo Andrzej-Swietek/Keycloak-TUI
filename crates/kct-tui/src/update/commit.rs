@@ -1,6 +1,6 @@
 use serde_json::Value;
 
-use crate::model::{Commit, Model, Picker};
+use crate::model::{Commit, Model, Overlay, Picker};
 
 use super::pick_roles;
 use super::picker::open_with;
@@ -31,6 +31,36 @@ pub(super) fn commit(model: Model, picker: &Picker) -> Transition {
         let mut extras = pick_roles::Extras::new();
         extras.insert(slot, id.to_owned());
         return open_with(model.without_overlay(), next, &extras);
+    }
+
+    // Naming step: the choice settles the path, the operator settles the name.
+    if let Commit::Name {
+        base,
+        from,
+        title,
+        singular,
+    } = &picker.commit
+    {
+        let Some(kind) = chosen
+            .first()
+            .and_then(|option| option.get(*from))
+            .and_then(Value::as_str)
+        else {
+            return Transition::pure(model.without_overlay());
+        };
+        return Transition::pure(model.without_overlay().with_overlay(Overlay::Prompt(
+            crate::model::Prompt {
+                title: std::sync::Arc::from(*title),
+                help: std::sync::Arc::from(format!("Type: {kind}")),
+                input: crate::text_input::TextInput::default(),
+                secret: false,
+                ask: crate::model::Ask::PostNamed {
+                    path: base.sub(kind),
+                    field: "name",
+                    singular,
+                },
+            },
+        )));
     }
 
     let effects = super::requests::requests(&picker.commit, &chosen, &labels);

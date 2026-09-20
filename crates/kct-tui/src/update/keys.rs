@@ -1,13 +1,12 @@
 use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
-use kct_core::catalog::{Ops, Verb};
+use kct_core::catalog::Verb;
 
 use crate::effect::Effect;
 use crate::model::{List, Model, Overlay, sidebar_rows};
-use crate::msg::Notice;
 use crate::text_input::TextInput;
 
 use super::commands::{copy_selection, open_palette, paged};
-use super::{actions, detail, nav, overlay, transition::Transition};
+use super::{detail, nav, overlay, transition::Transition};
 
 /// Route a keypress to whichever layer currently owns the keyboard.
 #[must_use]
@@ -116,8 +115,8 @@ fn listing(model: Model, key: KeyEvent) -> Transition {
         (KeyCode::Enter | KeyCode::Right | KeyCode::Char('l'), false) => enter(model),
         (KeyCode::Char('a'), false) => open_palette(model),
         (KeyCode::Char('r'), false) => nav::reload(model),
-        (KeyCode::Char('n'), false) => verb(model, Verb::Create),
-        (KeyCode::Char('x'), false) => verb(model, Verb::Delete),
+        (KeyCode::Char('n'), false) => super::verbs::verb(model, Verb::Create),
+        (KeyCode::Char('x'), false) => super::verbs::verb(model, Verb::Delete),
         (KeyCode::Char('y'), false) => copy_selection(model),
         (KeyCode::Char(']'), false) => paged(model, true),
         (KeyCode::Char('['), false) => paged(model, false),
@@ -160,30 +159,4 @@ fn enter(model: Model) -> Transition {
         };
     }
     nav::open_selected(model)
-}
-
-fn verb(model: Model, verb: Verb) -> Transition {
-    let resource = model.resource();
-    let needed = match verb {
-        Verb::Create => Ops::CREATE,
-        Verb::Delete => Ops::DELETE,
-        _ => Ops::READ,
-    };
-
-    if !resource.ops.has(needed) {
-        return Transition::pure(model.noticed(Notice::warning(format!(
-            "{} cannot be {} here",
-            resource.plural.to_lowercase(),
-            if needed == Ops::CREATE {
-                "created"
-            } else {
-                "deleted"
-            }
-        ))));
-    }
-
-    match resource.actions.iter().find(|action| action.verb == verb) {
-        Some(action) => actions::run(model, action),
-        None => Transition::pure(model),
-    }
 }

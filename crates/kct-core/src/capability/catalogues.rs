@@ -48,6 +48,22 @@ impl ServerProfile {
             .unwrap_or_default()
     }
 
+    /// Login event types the server can record.
+    #[must_use]
+    pub fn event_types(&self) -> Vec<String> {
+        self.raw
+            .pointer("/enums/eventType")
+            .and_then(Value::as_array)
+            .map(|types| {
+                types
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .map(ToOwned::to_owned)
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
     /// Protocol mapper type ids for a protocol.
     #[must_use]
     pub fn mapper_types(&self, protocol: &str) -> Vec<String> {

@@ -76,18 +76,6 @@ pub(crate) const AUTH_FLOWS: Resource = Resource {
         )
         .keywords(&["copy", "clone", "customise built-in"]),
         Action::new("delete", "Delete flow", Verb::Delete, Danger::Destructive),
-        Action::new(
-            "bind",
-            "Bind flow to realm",
-            Verb::Special("bind-flow"),
-            Danger::Destructive,
-        )
-        .keywords(&[
-            "browser flow",
-            "direct grant",
-            "reset credentials",
-            "make default",
-        ]),
     ],
     keywords: &[
         "login flow",

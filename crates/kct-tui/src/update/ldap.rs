@@ -35,17 +35,16 @@ pub(super) fn test(model: &Model, component: &Value, authenticate: bool) -> Resu
         "componentId": component.get("id").and_then(Value::as_str).unwrap_or_default(),
     });
 
-    Ok(Effect::Call {
-        method: Method::Post,
-        path: ep::LDAP_TEST_CONNECTION.resolve(&PathParams::realm(&*model.session.realm))?,
-        query: Vec::new(),
-        body: Some(body),
-        title: if authenticate {
+    Ok(Effect::call(
+        Method::Post,
+        ep::LDAP_TEST_CONNECTION.resolve(&PathParams::realm(&*model.session.realm))?,
+        Some(body),
+        if authenticate {
             "LDAP authentication succeeded".to_owned()
         } else {
             "LDAP connection succeeded".to_owned()
         },
-    })
+    ))
 }
 
 /// Trigger a user-storage sync. Keycloak selects full vs incremental with a query parameter.
@@ -75,17 +74,16 @@ pub(super) fn maintenance(model: &Model, component_id: &str, unlink: bool) -> Re
         ep::LDAP_REMOVE_IMPORTED
     };
 
-    Ok(Effect::Call {
-        method: Method::Post,
-        path: template.resolve(&params)?,
-        query: Vec::new(),
-        body: None,
-        title: if unlink {
+    Ok(Effect::call(
+        Method::Post,
+        template.resolve(&params)?,
+        None,
+        if unlink {
             "users unlinked from the provider".to_owned()
         } else {
             "imported users removed".to_owned()
         },
-    })
+    ))
 }
 
 pub(super) fn handle_test(model: Model, action: &'static Action, authenticate: bool) -> Transition {

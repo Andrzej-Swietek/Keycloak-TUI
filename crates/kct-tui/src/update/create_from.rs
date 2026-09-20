@@ -27,13 +27,12 @@ pub(super) fn create_from_json(model: Model, resource_id: &'static str, body: &s
     match plan::list(resource, model.context(), &model.list.query) {
         Ok(planned) => Transition::with(
             model,
-            Effect::Call {
-                method: Method::Post,
-                path: planned.path,
-                query: Vec::new(),
-                body: Some(parsed),
-                title: format!("created {}", resource.singular.to_lowercase()),
-            },
+            Effect::call(
+                Method::Post,
+                planned.path,
+                Some(parsed),
+                format!("created {}", resource.singular.to_lowercase()),
+            ),
         ),
         Err(error) => Transition::pure(model.noticed(Notice::from_error("cannot create", &error))),
     }

@@ -79,13 +79,12 @@ fn delete(model: Model, action: &'static Action) -> Transition {
         }
     };
 
-    let effect = Effect::Call {
-        method: Method::Delete,
-        path: planned.path,
-        query: Vec::new(),
-        body: None,
-        title: format!("deleted {} '{label}'", resource.singular.to_lowercase()),
-    };
+    let effect = Effect::call(
+        Method::Delete,
+        planned.path,
+        None,
+        format!("deleted {} '{label}'", resource.singular.to_lowercase()),
+    );
 
     Transition::pure(model.with_overlay(Overlay::Confirm(Confirm {
         title: Arc::from(action.title),
@@ -128,13 +127,12 @@ fn item_call(
     };
 
     let label = target.map_or_else(|| model.session.realm.to_string(), |(_, label)| label);
-    let effect = Effect::Call {
+    let effect = Effect::call(
         method,
         path,
-        query: Vec::new(),
-        body: Some(Value::Object(serde_json::Map::new())),
-        title: format!("{} · {label}", action.title.to_lowercase()),
-    };
+        Some(Value::Object(serde_json::Map::new())),
+        format!("{} · {label}", action.title.to_lowercase()),
+    );
 
     Transition::pure(model.with_overlay(Overlay::Confirm(Confirm {
         title: Arc::from(action.title),

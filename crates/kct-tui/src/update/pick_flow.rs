@@ -5,7 +5,7 @@ use kct_core::{Method, Result};
 
 use crate::model::{Commit, Model};
 
-use super::pick_specs::Spec;
+use super::pick_spec::Spec;
 
 /// Steps that can be added to the open flow.
 ///
@@ -20,22 +20,18 @@ pub(super) fn add_execution(model: &Model) -> Result<Spec> {
         .to_owned();
     let params = PathParams::realm(&*model.session.realm).with("flow", flow.clone());
 
-    Ok(Spec {
-        title: format!("Add a step to {flow}"),
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        source: ep::AUTH_AUTHENTICATOR_PROVIDERS.resolve(&params)?,
-        label: &["/displayName", "/id"],
-        commit: Commit::EachBody {
+    Ok(Spec::from(
+        format!("Add a step to {flow}"),
+        ep::AUTH_AUTHENTICATOR_PROVIDERS.resolve(&params)?,
+        &["/displayName", "/id"],
+        Commit::EachBody {
             method: Method::Post,
             path: ep::AUTH_FLOW_ADD_EXECUTION.resolve(&params)?,
             field: "provider",
             from: "id",
             title: "step added".to_owned(),
         },
-    })
+    ))
 }
 
 use std::sync::Arc;

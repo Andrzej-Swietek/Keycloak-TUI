@@ -100,7 +100,13 @@ pub(crate) const CLIENT_AUTHZ_POLICIES: Resource = Resource {
     requirement: Requirement::Feature(features::AUTHORIZATION),
     tabs: &[Tab::Raw],
     actions: &[
-        Action::new("create", "Create policy", Verb::Create, Danger::Confirm),
+        Action::new(
+            "create",
+            "Create policy",
+            Verb::Special("new-authz-policy"),
+            Danger::Confirm,
+        )
+        .keywords(&["policy type", "spi", "provider"]),
         Action::new("delete", "Delete policy", Verb::Delete, Danger::Destructive),
     ],
     keywords: &[
@@ -132,7 +138,13 @@ pub(crate) const CLIENT_AUTHZ_PERMISSIONS: Resource = Resource {
     requirement: Requirement::Feature(features::AUTHORIZATION),
     tabs: &[Tab::Raw],
     actions: &[
-        Action::new("create", "Create permission", Verb::Create, Danger::Confirm),
+        Action::new(
+            "create",
+            "Create permission",
+            Verb::Special("new-authz-permission"),
+            Danger::Confirm,
+        )
+        .keywords(&["permission type", "resource", "scope"]),
         Action::new(
             "delete",
             "Delete permission",

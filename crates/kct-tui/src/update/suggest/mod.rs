@@ -43,6 +43,8 @@ pub fn for_field(field: &Field, resource: &'static Resource, session: &Session) 
             vocab::REQUIRED_ACTIONS,
         ),
         "/passwordPolicy" => session.profile.password_policies(),
+        "/eventsListeners" => session.profile.provider_ids("eventsListener"),
+        "/enabledEventTypes" => session.profile.event_types(),
         "/protocol" => listed(vocab::PROTOCOLS),
         "/otpPolicyType" => listed(vocab::OTP_TYPES),
         "/otpPolicyAlgorithm" => listed(vocab::OTP_ALGORITHMS),

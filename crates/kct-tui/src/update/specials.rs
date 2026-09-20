@@ -11,6 +11,7 @@ use crate::msg::Notice;
 use crate::text_input::TextInput;
 
 use super::confirm::{ask, planned};
+use super::dormant;
 use super::{actions, ldap, nav, transition::Transition};
 
 /// Verbs the generic CRUD engine cannot serve, each needing Keycloak-specific knowledge.
@@ -34,8 +35,16 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         | "add-composite"
         | "set-execution-requirement"
         | "add-execution"
-        | "move-group") => super::picker::open(model, action),
+        | "move-group"
+        | "new-authz-policy"
+        | "new-authz-permission"
+        | "execute-actions-email") => super::picker::open(model, action),
         "add-sub-flow" => super::pick_flow::ask_sub_flow(model),
+        "copy-flow" => dormant::copy_flow(model, action),
+        "revoke-session" => dormant::revoke_session(model, action),
+        "invite-member" => dormant::invite_member(model, action),
+        "ldap-mapper-sync" => dormant::mapper_sync(model, action),
+        "installation-provider" => dormant::adapter_config(model, action),
         "reset-password" => ask_password(model),
         "partial-export" => super::transfer::export(model, action),
         "partial-import" => super::transfer::ask_import(model),
@@ -87,13 +96,12 @@ fn unlock(model: Model) -> Transition {
     match ep::USER_UNLOCK.resolve(&params) {
         Ok(path) => Transition::with(
             model,
-            Effect::Call {
-                method: Method::Delete,
+            Effect::call(
+                Method::Delete,
                 path,
-                query: Vec::new(),
-                body: None,
-                title: format!("lockout cleared for '{label}'"),
-            },
+                None,
+                format!("lockout cleared for '{label}'"),
+            ),
         ),
         Err(error) => Transition::pure(model.noticed(Notice::from_error("cannot unlock", &error))),
     }
@@ -101,13 +109,12 @@ fn unlock(model: Model) -> Transition {
 
 fn clear_lockouts(model: Model, action: &'static Action) -> Transition {
     let plan = |model: &Model| -> Result<Effect> {
-        Ok(Effect::Call {
-            method: Method::Delete,
-            path: ep::ATTACK_DETECTION.resolve(&PathParams::realm(&*model.session.realm))?,
-            query: Vec::new(),
-            body: None,
-            title: "all brute-force lockouts cleared".to_owned(),
-        })
+        Ok(Effect::call(
+            Method::Delete,
+            ep::ATTACK_DETECTION.resolve(&PathParams::realm(&*model.session.realm))?,
+            None,
+            "all brute-force lockouts cleared".to_owned(),
+        ))
     };
     planned(
         model,
@@ -128,13 +135,12 @@ fn item_post(model: Model, action: &'static Action, suffix: &'static str) -> Tra
             model,
             action,
             &format!("{} for '{label}'?", action.title),
-            Effect::Call {
-                method: Method::Post,
-                path: planned.path.sub(suffix),
-                query: Vec::new(),
-                body: Some(json!({})),
-                title: format!("{} · {label}", action.title.to_lowercase()),
-            },
+            Effect::call(
+                Method::Post,
+                planned.path.sub(suffix),
+                Some(json!({})),
+                format!("{} · {label}", action.title.to_lowercase()),
+            ),
         ),
         Err(error) => Transition::pure(model.noticed(Notice::from_error(action.title, &error))),
     }

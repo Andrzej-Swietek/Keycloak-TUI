@@ -12,14 +12,13 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
             method,
             path,
             title,
-        } => vec![Effect::Call {
-            method: *method,
-            path: path.clone(),
-            query: Vec::new(),
-            body: Some(Value::Array(chosen.to_vec())),
-            title: format!("{title}: {labels}"),
-        }],
-        Commit::Chain { .. } => Vec::new(),
+        } => vec![Effect::call(
+            *method,
+            path.clone(),
+            Some(Value::Array(chosen.to_vec())),
+            format!("{title}: {labels}"),
+        )],
+        Commit::Chain { .. } | Commit::Name { .. } => Vec::new(),
         Commit::Replace {
             method,
             path,
@@ -30,16 +29,17 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
         } => chosen
             .first()
             .and_then(|option| option.get(*from).cloned())
-            .map(|value| Effect::Call {
-                method: *method,
-                path: path.clone(),
-                query: Vec::new(),
-                body: Some(kct_core::json::set_at(
-                    base.clone(),
-                    &format!("/{field}"),
-                    value,
-                )),
-                title: format!("{title}: {labels}"),
+            .map(|value| {
+                Effect::call(
+                    *method,
+                    path.clone(),
+                    Some(kct_core::json::set_at(
+                        base.clone(),
+                        &format!("/{field}"),
+                        value,
+                    )),
+                    format!("{title}: {labels}"),
+                )
             })
             .into_iter()
             .collect(),
@@ -52,16 +52,17 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
         } => chosen
             .iter()
             .filter_map(|option| option.get(*from).cloned())
-            .map(|value| Effect::Call {
-                method: *method,
-                path: path.clone(),
-                query: Vec::new(),
-                body: Some(kct_core::json::set_at(
-                    Value::Object(serde_json::Map::new()),
-                    &format!("/{field}"),
-                    value,
-                )),
-                title: format!("{title}: {labels}"),
+            .map(|value| {
+                Effect::call(
+                    *method,
+                    path.clone(),
+                    Some(kct_core::json::set_at(
+                        Value::Object(serde_json::Map::new()),
+                        &format!("/{field}"),
+                        value,
+                    )),
+                    format!("{title}: {labels}"),
+                )
             })
             .collect(),
         Commit::EachUnder {
@@ -74,12 +75,13 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
         } => chosen
             .iter()
             .filter_map(|option| option.get(*key).and_then(Value::as_str))
-            .map(|id| Effect::Call {
-                method: *method,
-                path: base.child(id).sub(suffix),
-                query: Vec::new(),
-                body: Some(body.clone()),
-                title: format!("{title}: {labels}"),
+            .map(|id| {
+                Effect::call(
+                    *method,
+                    base.child(id).sub(suffix),
+                    Some(body.clone()),
+                    format!("{title}: {labels}"),
+                )
             })
             .collect(),
         Commit::Each {
@@ -90,13 +92,7 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
         } => chosen
             .iter()
             .filter_map(|option| option.get(*key).and_then(Value::as_str))
-            .map(|id| Effect::Call {
-                method: *method,
-                path: base.child(id),
-                query: Vec::new(),
-                body: None,
-                title: format!("{title}: {labels}"),
-            })
+            .map(|id| Effect::call(*method, base.child(id), None, format!("{title}: {labels}")))
             .collect(),
     }
 }

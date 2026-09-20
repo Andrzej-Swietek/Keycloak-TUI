@@ -5,7 +5,8 @@ use kct_core::{Method, Result};
 
 use crate::model::{Commit, Model};
 
-use super::pick_specs::{Spec, owner};
+use super::pick_spec::Spec;
+use super::pick_specs::owner;
 
 /// Extra slots a chained picker carries from the step before it.
 pub(super) type Extras = BTreeMap<&'static str, String>;
@@ -14,20 +15,16 @@ pub(super) type Extras = BTreeMap<&'static str, String>;
 pub(super) fn pick_client(model: &Model) -> Result<Spec> {
     owner(model).ok_or_else(|| kct_core::Error::config("select a user or group first"))?;
 
-    Ok(Spec {
-        title: "Assign client role — pick the client".to_owned(),
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        source: ep::CLIENTS.resolve(&PathParams::realm(&*model.session.realm))?,
-        label: &["/clientId", "/name"],
-        commit: Commit::Chain {
+    Ok(Spec::from(
+        "Assign client role — pick the client",
+        ep::CLIENTS.resolve(&PathParams::realm(&*model.session.realm))?,
+        &["/clientId", "/name"],
+        Commit::Chain {
             next: "assign-client-role",
             slot: "client",
             key: "id",
         },
-    })
+    ))
 }
 
 /// Step two: the roles of the client chosen a moment ago.
@@ -43,20 +40,16 @@ pub(super) fn assign_client_role(model: &Model, extras: &Extras) -> Result<Spec>
         .with("owner", target)
         .with("client", client.clone());
 
-    Ok(Spec {
-        title: "Assign client roles".to_owned(),
-        options: None,
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        source: ep::ROLE_MAPPINGS_CLIENT_AVAILABLE.resolve(&params)?,
-        label: &["/name"],
-        commit: Commit::Batch {
+    Ok(Spec::from(
+        "Assign client roles",
+        ep::ROLE_MAPPINGS_CLIENT_AVAILABLE.resolve(&params)?,
+        &["/name"],
+        Commit::Batch {
             method: Method::Post,
             path: ep::ROLE_MAPPINGS_CLIENT.resolve(&params)?,
             title: "client roles assigned".to_owned(),
         },
-    })
+    ))
 }
 
 /// Roles a composite role grants transitively.
@@ -78,20 +71,17 @@ pub(super) fn add_composite(model: &Model) -> Result<Spec> {
     let params = PathParams::realm(&*model.session.realm).with("role", role_id);
     let composites = ep::ROLE_COMPOSITES.resolve(&params)?;
 
-    Ok(Spec {
-        title: format!("Roles associated with '{name}'"),
-        options: None,
-        require: Vec::new(),
-        exclude: vec![composites.clone()],
-        without: Vec::new(),
-        source: ep::ROLES.resolve(&PathParams::realm(&*model.session.realm))?,
-        label: &["/name"],
-        commit: Commit::Batch {
+    Ok(Spec::from(
+        format!("Roles associated with '{name}'"),
+        ep::ROLES.resolve(&PathParams::realm(&*model.session.realm))?,
+        &["/name"],
+        Commit::Batch {
             method: Method::Post,
-            path: composites,
+            path: composites.clone(),
             title: "associated roles added".to_owned(),
         },
-    })
+    )
+    .excluding(vec![composites]))
 }
 
 /// Change an authentication step's requirement.
@@ -137,16 +127,11 @@ pub(super) fn set_requirement(model: &Model) -> Result<Spec> {
         .unwrap_or("step")
         .to_owned();
 
-    Ok(Spec {
-        title: format!("Requirement for '{name}'"),
-        options: Some(choices),
-        require: Vec::new(),
-        exclude: Vec::new(),
-        without: Vec::new(),
-        // The choices are already in hand, so the picker needs no fetch.
-        source: ep::AUTH_FLOW_EXECUTIONS.resolve(&params)?,
-        label: &["/name"],
-        commit: Commit::Replace {
+    Ok(Spec::from(
+        format!("Requirement for '{name}'"),
+        ep::AUTH_FLOW_EXECUTIONS.resolve(&params)?,
+        &["/name"],
+        Commit::Replace {
             method: Method::Put,
             path: ep::AUTH_FLOW_EXECUTIONS.resolve(&params)?,
             base: execution,
@@ -154,5 +139,6 @@ pub(super) fn set_requirement(model: &Model) -> Result<Spec> {
             from: "name",
             title: format!("requirement for '{name}'"),
         },
-    })
+    )
+    .of(choices))
 }

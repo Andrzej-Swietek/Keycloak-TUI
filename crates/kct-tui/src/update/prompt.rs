@@ -40,6 +40,19 @@ fn submit(model: Model, state: Prompt) -> Transition {
             super::create_from::create_from_json(model, resource, &answer)
         }
         Ask::AddSubFlow => add_sub_flow(model, &answer),
+        Ask::PostNamed {
+            path,
+            field,
+            singular,
+        } => Transition::with(
+            model,
+            Effect::call(
+                Method::Post,
+                path,
+                Some(json!({ field: answer })),
+                format!("{singular} '{answer}'"),
+            ),
+        ),
     }
 }
 
@@ -55,18 +68,17 @@ fn add_sub_flow(model: Model, alias: &str) -> Transition {
     match ep::AUTH_FLOW_ADD_SUBFLOW.resolve(&params) {
         Ok(path) => Transition::with(
             model,
-            Effect::Call {
-                method: Method::Post,
+            Effect::call(
+                Method::Post,
                 path,
-                query: Vec::new(),
-                body: Some(json!({
+                Some(json!({
                     "alias": alias,
                     "type": "basic-flow",
                     "description": "",
                     "provider": "registration-page-form",
                 })),
-                title: format!("added sub-flow '{alias}'"),
-            },
+                format!("added sub-flow '{alias}'"),
+            ),
         ),
         Err(error) => Transition::pure(model.noticed(Notice::from_error("cannot add", &error))),
     }
@@ -113,16 +125,7 @@ fn create(
             None => (Method::Post, draft),
         };
 
-    Transition::with(
-        model,
-        Effect::Call {
-            method,
-            path: planned.path,
-            query: Vec::new(),
-            body: Some(body),
-            title,
-        },
-    )
+    Transition::with(model, Effect::call(method, planned.path, Some(body), title))
 }
 
 fn set_password(model: Model, password: &str, temporary: bool) -> Transition {
@@ -134,17 +137,16 @@ fn set_password(model: Model, password: &str, temporary: bool) -> Transition {
     match ep::USER_RESET_PASSWORD.resolve(&params) {
         Ok(path) => Transition::with(
             model,
-            Effect::Call {
-                method: Method::Put,
+            Effect::call(
+                Method::Put,
                 path,
-                query: Vec::new(),
-                body: Some(json!({
+                Some(json!({
                     "type": "password",
                     "value": password,
                     "temporary": temporary,
                 })),
-                title: format!("password set for '{label}'"),
-            },
+                format!("password set for '{label}'"),
+            ),
         ),
         Err(error) => {
             Transition::pure(model.noticed(Notice::from_error("cannot set password", &error)))

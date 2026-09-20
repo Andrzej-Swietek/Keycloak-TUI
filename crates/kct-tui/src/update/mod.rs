@@ -11,6 +11,7 @@ mod confirm;
 mod create_from;
 mod data;
 mod detail;
+mod dormant;
 mod field_edit;
 mod keys;
 mod ldap;
@@ -18,9 +19,11 @@ mod nav;
 mod nested;
 mod overlay;
 mod parse;
+mod pick_authz;
 mod pick_flow;
 mod pick_groups;
 mod pick_roles;
+mod pick_spec;
 mod pick_specs;
 mod picker;
 mod prompt;
@@ -34,6 +37,7 @@ mod suggest;
 mod tokens;
 mod transfer;
 mod transition;
+mod verbs;
 mod warnings;
 
 pub use detail::visible_fields;
@@ -90,7 +94,11 @@ pub fn update(model: Model, msg: Msg) -> Transition {
 #[cfg(test)]
 mod tests;
 #[cfg(test)]
+mod tests_actions;
+#[cfg(test)]
 mod tests_attributes;
+#[cfg(test)]
+mod tests_authz;
 #[cfg(test)]
 mod tests_detail;
 #[cfg(test)]

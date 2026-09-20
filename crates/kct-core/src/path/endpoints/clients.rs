@@ -84,3 +84,7 @@ pub const CLIENT_INITIAL_ACCESS_ITEM: Template =
     Template("/admin/realms/{realm}/clients-initial-access/{token}");
 pub const CLIENT_SCOPE_PROTOCOL_MAPPER: Template =
     Template("/admin/realms/{realm}/client-scopes/{scope}/protocol-mappers/models/{mapper}");
+pub const CLIENT_AUTHZ_PERMISSION_PROVIDERS: Template =
+    Template("/admin/realms/{realm}/clients/{client}/authz/resource-server/permission/providers");
+pub const CLIENT_AUTHZ_RESOURCE_SERVER: Template =
+    Template("/admin/realms/{realm}/clients/{client}/authz/resource-server");

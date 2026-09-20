@@ -10,6 +10,14 @@ pub fn for_error(error: &Error) -> Option<&'static str> {
         Error::Api {
             status: 403, path, ..
         } => Some(missing_role(path)),
+        // A policy type carrying its own required field — a group policy's `groups`, a
+        // client policy's `clients` — answers 500 to a create that only names it.
+        Error::Api {
+            status: 500, path, ..
+        } if path.contains("/authz/resource-server/policy/") => Some(
+            "This policy type needs its own field set before it will exist. Create one of \
+             another type, or send the full representation from the JSON tab.",
+        ),
         // Keycloak answers with an opaque 500 when a user-federation provider it has to
         // consult is unreachable, including on writes that look unrelated to it.
         Error::Api { status: 500, .. } => Some(
