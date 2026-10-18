@@ -121,7 +121,10 @@ fn a_rows_own_id_and_its_parents_id_can_share_a_slot_name() {
     assert_eq!(mappers.collection_slots(), vec!["component"]);
     assert_eq!(mappers.item_slot(), Some("component"));
 
-    assert!(by_id("users").unwrap().collection_slots().is_empty());
+    assert_eq!(
+        by_id("users").unwrap().collection_slots(),
+        Vec::<&str>::new()
+    );
     assert_eq!(by_id("users").unwrap().item_slot(), Some("user"));
 }
 

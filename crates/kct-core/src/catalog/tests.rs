@@ -108,9 +108,8 @@ fn shapes_normalise_every_response_layout_keycloak_uses() {
     assert_eq!(entries[0]["name"], json!("policy"));
     assert_eq!(entries[0]["internal"], json!(false));
 
-    assert!(
-        Shape::ArrayAt("/keys")
-            .rows(json!({"unexpected": 1}))
-            .is_empty()
+    assert_eq!(
+        Shape::ArrayAt("/keys").rows(json!({"unexpected": 1})),
+        Vec::<serde_json::Value>::new()
     );
 }

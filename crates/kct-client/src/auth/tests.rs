@@ -123,7 +123,7 @@ async fn a_pre_issued_token_is_used_as_is_and_never_renewed() {
     );
 
     assert_eq!(auth.bearer().await.unwrap().expose(), "from-ci");
-    assert!(endpoint.grant_types().is_empty());
+    assert_eq!(endpoint.grant_types(), Vec::<String>::new());
 
     auth.invalidate().await;
     assert!(auth.bearer().await.is_err(), "nothing to renew from");

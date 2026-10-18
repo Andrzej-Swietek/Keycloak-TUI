@@ -20,7 +20,10 @@ fn a_field_no_object_carries_is_flagged_once_there_are_enough_objects() {
     });
 
     // One object proves nothing: Keycloak omits an unset optional field.
-    assert!(compare_fields(users, std::slice::from_ref(&sample)).is_empty());
+    assert_eq!(
+        compare_fields(users, std::slice::from_ref(&sample)),
+        Vec::<Finding>::new()
+    );
 
     let many = vec![sample.clone(), sample.clone(), sample];
     let findings = compare_fields(users, &many);
@@ -126,7 +129,7 @@ fn a_gate_on_a_feature_the_server_never_heard_of_is_broken() {
 #[test]
 fn an_incomplete_profile_reports_nothing_rather_than_everything() {
     let degraded = ServerProfile::from_discovery(crate::Version::new(26, 7, 3));
-    assert!(check_feature_gates(&degraded).is_empty());
+    assert_eq!(check_feature_gates(&degraded), Vec::<Finding>::new());
 }
 
 #[test]

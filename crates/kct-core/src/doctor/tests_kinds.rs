@@ -1,6 +1,6 @@
 //! Field controls against the shape of the data behind them.
 
-use super::compare_kinds;
+use super::{Finding, compare_kinds};
 use crate::resources;
 use serde_json::json;
 
@@ -38,7 +38,10 @@ fn a_component_config_list_is_not_a_mismatch() {
     let federation = resources::by_id("user-federation").unwrap();
     let sample = json!({"config": {"enabled": ["true"], "usersDn": ["ou=people"]}});
 
-    assert!(compare_kinds(federation, std::slice::from_ref(&sample)).is_empty());
+    assert_eq!(
+        compare_kinds(federation, std::slice::from_ref(&sample)),
+        Vec::<Finding>::new()
+    );
 }
 
 #[test]

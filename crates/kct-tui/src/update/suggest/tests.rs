@@ -43,7 +43,10 @@ fn theme_fields_offer_what_the_server_actually_has() {
 #[test]
 fn a_field_with_no_known_vocabulary_suggests_nothing() {
     let field = Field::new("Description", "/description", FieldKind::Multiline);
-    assert!(for_field(&field, realm(), &session_with_themes()).is_empty());
+    assert_eq!(
+        for_field(&field, realm(), &session_with_themes()),
+        Vec::<String>::new()
+    );
 }
 
 #[test]
