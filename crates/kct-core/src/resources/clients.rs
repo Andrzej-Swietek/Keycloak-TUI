@@ -1,3 +1,4 @@
+use super::client_actions::CLIENT_ACTIONS;
 use super::client_fields::{
     CLIENT_ACCESS_FIELDS, CLIENT_CAPABILITY_FIELDS, CLIENT_COLUMNS, CLIENT_SETTINGS_FIELDS,
     CLIENT_TOKEN_FIELDS,
@@ -113,58 +114,7 @@ pub(crate) const CLIENTS: Resource = Resource {
         },
         Tab::Raw,
     ],
-    actions: &[
-        Action::new("create", "Create client", Verb::Create, Danger::Confirm),
-        Action::new(
-            "add-client-scope",
-            "Add default client scope",
-            Verb::Special("add-client-scope"),
-            Danger::Confirm,
-        )
-        .keywords(&["scope", "claims", "assign scope"]),
-        Action::new("edit", "Edit client", Verb::Edit, Danger::Confirm),
-        Action::new("delete", "Delete client", Verb::Delete, Danger::Destructive),
-        Action::new(
-            "show-secret",
-            "Show client secret",
-            Verb::Fetch("client-secret"),
-            Danger::Safe,
-        )
-        .keywords(&["credential", "password"]),
-        Action::new(
-            "regenerate-secret",
-            "Regenerate client secret",
-            Verb::Special("regenerate-secret"),
-            Danger::Destructive,
-        )
-        .keywords(&["rotate", "new secret"]),
-        Action::new(
-            "adapter-config",
-            "Download adapter config",
-            Verb::Special("installation-provider"),
-            Danger::Safe,
-        )
-        .keywords(&["keycloak.json", "installation", "jboss", "saml descriptor"]),
-        Action::new(
-            "service-account",
-            "Open service account user",
-            Verb::Special("service-account-user"),
-            Danger::Safe,
-        ),
-        Action::new(
-            "get-token",
-            "Get a token as this client",
-            Verb::Special("token-for-client"),
-            Danger::Safe,
-        )
-        .keywords(&[
-            "client credentials",
-            "test integration",
-            "what claims does it get",
-            "jwt",
-            "why is my role missing",
-        ]),
-    ],
+    actions: CLIENT_ACTIONS,
     keywords: &["application", "app", "oidc", "saml", "relying party", "sp"],
     summary: "Applications and services that obtain tokens from this realm.",
 };

@@ -10,7 +10,8 @@ pub mod features {
     pub const IMPERSONATION: &str = "impersonation";
     pub const DEVICE_FLOW: &str = "device-flow";
     pub const AUTHORIZATION: &str = "authorization";
-    pub const SCIM: &str = "scim";
+    pub const SCIM_API: &str = "scim-api";
+    pub const CLIENT_SECRET_ROTATION: &str = "client-secret-rotation";
     pub const WORKFLOWS: &str = "workflows";
     pub const PASSKEYS: &str = "passkeys";
 }

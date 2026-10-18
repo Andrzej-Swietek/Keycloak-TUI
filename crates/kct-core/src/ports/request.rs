@@ -2,6 +2,7 @@ use serde_json::Value;
 
 use crate::error::Method;
 use crate::path::ApiPath;
+use crate::secret::Secret;
 
 /// What a response body is expected to be.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -28,6 +29,8 @@ pub struct Request {
     /// Off for the OIDC protocol endpoints: sending an unrelated bearer to `/token` invites
     /// Keycloak to treat it as client authentication and fail in a confusing way.
     pub authenticated: bool,
+    /// A token other than the session's, e.g. one obtained as a client to call SCIM.
+    pub bearer: Option<Secret>,
 }
 
 impl Request {
@@ -41,6 +44,18 @@ impl Request {
             expect: Expect::Json,
             form: None,
             authenticated: true,
+            bearer: None,
+        }
+    }
+
+    /// Present `token` instead of the session's own. A 401 then says nothing about the
+    /// session, so the gateway must not renew it.
+    #[must_use]
+    pub fn with_bearer(self, token: Secret) -> Self {
+        Self {
+            authenticated: false,
+            bearer: Some(token),
+            ..self
         }
     }
 

@@ -49,6 +49,20 @@ pub fn for_error(error: &Error) -> Option<&'static str> {
         Error::Api { status: 409, .. } => {
             Some("An object with that name already exists in this realm.")
         }
+        // 26.8 (CVE-2026-15943): a masked secret may no longer ride along with a change to
+        // where it would be sent, or a stored secret could be replayed to a new endpoint.
+        Error::Api {
+            status: 400,
+            path,
+            message,
+            ..
+        } if path.contains("/identity-provider/instances/") && message.contains("re-entered") => {
+            Some(
+                "Keycloak 26.8 will not reuse the stored client secret once the token URL, \
+                 client ID or auth method changes. Type the secret again on the Endpoints tab \
+                 and save both together.",
+            )
+        }
         Error::Api { status: 400, .. } => {
             Some("Keycloak rejected the payload; the JSON tab shows exactly what was sent.")
         }
@@ -67,13 +81,18 @@ pub fn for_error(error: &Error) -> Option<&'static str> {
 
 /// Name the `realm-management` role a 403 is most likely missing.
 ///
-/// Verified against Keycloak 26.7.3. A delegated admin typically holds a handful of these,
+/// Verified against Keycloak 26.8.1. A delegated admin typically holds a handful of these,
 /// so "403" on its own leaves an operator guessing; the role name does not.
 fn missing_role(path: &str) -> &'static str {
     const CHECKS: &[(&str, &str)] = &[
         (
             "/authz/",
             "this needs the `view-authorization` (or `manage-authorization`) role.",
+        ),
+        (
+            "/client-secret",
+            "reading a secret needs `manage-clients` from Keycloak 26.8; `view-clients` \
+             only sees it masked.",
         ),
         (
             "/clients",

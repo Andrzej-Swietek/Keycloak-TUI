@@ -14,10 +14,10 @@ fn decodes_a_keycloak_access_token() {
     let raw = encode(
         &json!({"alg": "RS256", "typ": "JWT", "kid": "abc123"}),
         &json!({
-            "iss": "https://kc/realms/avsystem",
+            "iss": "https://kc/realms/acme",
             "sub": "u1",
-            "azp": "coiote-ae",
-            "aud": ["account", "coiote-ae"],
+            "azp": "web-app",
+            "aud": ["account", "web-app"],
             "scope": "openid profile email",
             "preferred_username": "alice",
             "realm_access": {"roles": ["deploy-approver", "offline_access"]},
@@ -30,8 +30,8 @@ fn decodes_a_keycloak_access_token() {
 
     let claims = token.claims();
     assert_eq!(claims.preferred_username.as_deref(), Some("alice"));
-    assert_eq!(claims.authorized_party.as_deref(), Some("coiote-ae"));
-    assert_eq!(claims.audience, vec!["account", "coiote-ae"]);
+    assert_eq!(claims.authorized_party.as_deref(), Some("web-app"));
+    assert_eq!(claims.audience, vec!["account", "web-app"]);
     assert_eq!(claims.scope, vec!["openid", "profile", "email"]);
     assert_eq!(claims.realm_roles.len(), 2);
     assert!(matches!(claims.expiry, Expiry::Valid(_)));

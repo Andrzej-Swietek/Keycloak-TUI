@@ -34,6 +34,7 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         Verb::Edit => Transition::pure(model.without_overlay()),
         Verb::Delete => delete(model, action),
         Verb::Post(suffix) => item_call(model, action, Method::Post, suffix),
+        Verb::Remove(suffix) => item_call(model, action, Method::Delete, suffix),
         Verb::Fetch(suffix) => fetch(model, action, suffix),
         Verb::Export | Verb::Import | Verb::Duplicate | Verb::Special(_) => {
             specials::run(model, action)

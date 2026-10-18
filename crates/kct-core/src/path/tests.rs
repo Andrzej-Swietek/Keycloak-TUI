@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn resolves_multi_slot_templates() {
-    let params = PathParams::realm("avsystem")
+    let params = PathParams::realm("acme")
         .with("ownerKind", "users")
         .with("owner", "42")
         .with("client", "abc");
@@ -12,7 +12,7 @@ fn resolves_multi_slot_templates() {
             .resolve(&params)
             .unwrap()
             .as_str(),
-        "/admin/realms/avsystem/users/42/role-mappings/clients/abc"
+        "/admin/realms/acme/users/42/role-mappings/clients/abc"
     );
 }
 

@@ -6,7 +6,7 @@ fn profile() -> ServerProfile {
         "systemInfo": {"version": "26.6.1"},
         "features": [
             {"name": "organization", "type": "DEFAULT", "enabled": true},
-            {"name": "scim", "type": "PREVIEW", "enabled": false},
+            {"name": "scim-api", "type": "PREVIEW", "enabled": false},
             {"name": "token-exchange", "type": "PREVIEW", "enabled": true}
         ],
         "providers": {"policy": {"providers": {"group-hierarchy": {}, "role": {}}}},
@@ -41,9 +41,9 @@ fn disabled_and_missing_features_read_differently() {
         Support::Available
     );
 
-    let scim = profile.evaluate(&Requirement::Feature(features::SCIM));
+    let scim = profile.evaluate(&Requirement::Feature(features::SCIM_API));
     assert!(!scim.is_permitted());
-    assert!(scim.reason().unwrap().contains("--features=scim"));
+    assert!(scim.reason().unwrap().contains("--features=scim-api"));
 
     let absent = profile.evaluate(&Requirement::Feature("no-such-feature"));
     assert!(matches!(absent, Support::Unavailable(_)));
@@ -81,7 +81,7 @@ fn old_servers_are_told_exactly_what_they_are_missing() {
 fn combinators_pick_the_pessimistic_and_optimistic_answers() {
     static BOTH: &[Requirement] = &[
         Requirement::MinVersion(Version::new(26, 0, 0)),
-        Requirement::Feature(features::SCIM),
+        Requirement::Feature(features::SCIM_API),
     ];
     let profile = profile();
     assert!(!profile.evaluate(&Requirement::All(BOTH)).is_permitted());

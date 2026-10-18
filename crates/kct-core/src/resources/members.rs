@@ -22,6 +22,18 @@ pub(crate) const GROUP_MEMBERS: Resource = Resource {
     summary: "Users that are direct members of this group.",
 };
 
+const ORG_MEMBER_COLUMNS: &[Column] = &[
+    Column::new("Username", Projection::At("/username"), Width::Flex(3)).toned(Tone::Primary),
+    Column::new("Email", Projection::At("/email"), Width::Flex(3)),
+    Column::new("Name", Projection::Compute(full_name), Width::Flex(3)),
+    Column::new(
+        "Membership",
+        Projection::At("/membershipType"),
+        Width::Fixed(10),
+    )
+    .toned(Tone::Muted),
+];
+
 pub(crate) const ORG_MEMBERS: Resource = Resource {
     id: "org-members",
     singular: "Member",
@@ -34,13 +46,21 @@ pub(crate) const ORG_MEMBERS: Resource = Resource {
     key: Key::ID,
     new_object: None,
     label: &["/username", "/email", "/id"],
-    columns: USER_COLUMNS,
+    columns: ORG_MEMBER_COLUMNS,
     search: Search::Server,
     ops: Ops::RO.with(Ops::CREATE).with(Ops::DELETE),
     requirement: KC_26,
     tabs: &[Tab::Raw],
     actions: &[
         Action::new("add", "Add existing user", Verb::Create, Danger::Confirm),
+        Action::new(
+            "membership",
+            "Set membership type",
+            Verb::Special("set-member-type"),
+            Danger::Confirm,
+        )
+        .needs(KC_26_8)
+        .keywords(&["managed", "unmanaged"]),
         Action::new(
             "delete",
             "Remove from organization",

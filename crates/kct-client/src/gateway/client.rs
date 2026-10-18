@@ -76,7 +76,10 @@ impl KeycloakClient {
 
     async fn send_once(&self, request: &Request) -> Result<Response> {
         if !request.authenticated {
-            return self.transport.execute(request, None).await;
+            return self
+                .transport
+                .execute(request, request.bearer.as_ref())
+                .await;
         }
         let bearer = self.auth.bearer().await?;
         self.transport.execute(request, Some(&bearer)).await
@@ -111,7 +114,9 @@ impl Gateway for KeycloakClient {
 
                 // The server says the token is no good — believe it, renew, and try once
                 // more. This is the common case after a laptop comes back from sleep.
-                Err(error) if error.is_unauthenticated() && attempt == 0 => {
+                Err(error)
+                    if error.is_unauthenticated() && request.authenticated && attempt == 0 =>
+                {
                     tracing::debug!("got 401, renewing the access token");
                     self.auth.invalidate().await;
                     match self.send_once(&request).await {

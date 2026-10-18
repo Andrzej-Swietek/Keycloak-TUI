@@ -102,7 +102,8 @@ pub(crate) const REALM_SECURITY_FIELDS: &[Field] = &[
         FieldKind::List,
     ),
     Field::new("SCIM API", "/scimApiEnabled", FieldKind::Bool)
-        .help("Preview in Keycloak 26.7; needs the `scim` feature switched on at startup."),
+        .help("Serves SCIM 2.0 under /realms/{realm}/scim/v2. Supported and on by default from 26.8; preview behind `scim-api` before that.")
+        .needs(Requirement::Feature(features::SCIM_API)),
     Field::new(
         "Verifiable credentials",
         "/verifiableCredentialsEnabled",

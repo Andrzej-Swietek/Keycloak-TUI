@@ -96,11 +96,11 @@ mod tests {
         let command = curl(
             Method::Get,
             "https://kc.example.com",
-            "/admin/realms/avsystem/users",
+            "/admin/realms/acme/users",
         );
 
         assert!(command.contains("$KC_TOKEN"));
-        assert!(command.contains("https://kc.example.com/admin/realms/avsystem/users"));
+        assert!(command.contains("https://kc.example.com/admin/realms/acme/users"));
         assert!(command.contains("-X GET"));
     }
 }

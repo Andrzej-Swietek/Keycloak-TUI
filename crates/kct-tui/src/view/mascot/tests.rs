@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 fn model() -> Model {
     Model::new(
-        Session::new("https://kc", "avsystem", "admin"),
+        Session::new("https://kc", "acme", "admin"),
         kct_core::resources::by_id("users").unwrap(),
     )
 }
@@ -45,7 +45,7 @@ fn dry_run_is_visible_even_when_nothing_is_happening() {
     let watching = Model {
         session: Session {
             dry_run: true,
-            ..Session::new("https://kc", "avsystem", "admin")
+            ..Session::new("https://kc", "acme", "admin")
         },
         ..model()
     };

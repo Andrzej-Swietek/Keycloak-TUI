@@ -19,7 +19,7 @@ fn roles_can_be_assigned_straight_from_the_users_list() {
             ..crate::model::List::default()
         }
         .refiltered(users),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), users)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), users)
     };
 
     let Transition { model, effects } = super::picker::open(model, "assign-role");
@@ -28,7 +28,7 @@ fn roles_can_be_assigned_straight_from_the_users_list() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/users/u1/role-mappings/realm/available"
+            "/admin/realms/acme/users/u1/role-mappings/realm/available"
         ),
         other => panic!("expected one load, got {other:?}"),
     }
@@ -43,7 +43,7 @@ fn a_group_gets_its_own_owner_kind() {
             ..crate::model::List::default()
         }
         .refiltered(groups),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), groups)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), groups)
     };
 
     let Transition { effects, .. } = super::picker::open(model, "assign-role");
@@ -67,7 +67,7 @@ fn scopes_already_attached_are_not_offered_again() {
             ..crate::model::List::default()
         }
         .refiltered(clients),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), clients)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), clients)
     };
 
     let Transition { model, effects } = super::picker::open(model, "add-client-scope");

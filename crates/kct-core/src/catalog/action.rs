@@ -20,6 +20,8 @@ pub enum Verb {
     Delete,
     /// `POST` to a sub-path with no body, e.g. `logout`.
     Post(&'static str),
+    /// `DELETE` a sub-path, e.g. a client's rotated secret.
+    Remove(&'static str),
     /// `GET` a sub-path and show the result.
     Fetch(&'static str),
     Export,

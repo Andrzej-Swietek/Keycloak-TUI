@@ -9,7 +9,9 @@ use crate::model::{Model, Overlay, Picker};
 use crate::msg::{Fetch, Notice};
 
 use super::commit::commit;
-use super::{pick_authz, pick_flow, pick_groups, pick_roles, pick_specs, transition::Transition};
+use super::{
+    pick_authz, pick_flow, pick_groups, pick_org, pick_roles, pick_specs, transition::Transition,
+};
 
 /// Open a picker for one of the actions that grant or revoke something.
 #[must_use]
@@ -31,6 +33,8 @@ pub fn open_with(model: Model, action: &'static str, extras: &pick_roles::Extras
         "set-execution-requirement" => pick_roles::set_requirement(&model),
         "add-execution" => pick_flow::add_execution(&model),
         "move-group" => pick_groups::move_group(&model),
+        "set-org-membership" => pick_org::set_membership(&model),
+        "set-member-type" => pick_org::set_member_type(&model),
         "execute-actions-email" => pick_specs::execute_actions_email(&model),
         "new-authz-policy" => pick_authz::new_policy(&model),
         "new-authz-permission" => pick_authz::new_permission(&model),

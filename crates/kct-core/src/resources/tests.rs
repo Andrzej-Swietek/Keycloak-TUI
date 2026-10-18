@@ -128,7 +128,7 @@ fn a_rows_own_id_and_its_parents_id_can_share_a_slot_name() {
 #[test]
 fn nested_component_collections_resolve_their_parent_filter() {
     let mappers = by_id("federation-mappers").unwrap();
-    let params = PathParams::realm("avsystem").with("component", "ldap-1");
+    let params = PathParams::realm("acme").with("component", "ldap-1");
     let resolved = mappers.resolved_params(&params);
 
     assert!(resolved.contains(&("parent".to_owned(), "ldap-1".to_owned())));

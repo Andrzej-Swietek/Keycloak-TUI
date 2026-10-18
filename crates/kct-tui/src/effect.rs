@@ -50,6 +50,12 @@ pub enum Effect {
         client_id: String,
         secret_path: ApiPath,
     },
+    /// Obtain a token as a client and try the realm's SCIM endpoint with it.
+    ScimProbe {
+        realm: String,
+        client_id: String,
+        secret_path: ApiPath,
+    },
     WriteFile {
         path: std::path::PathBuf,
         contents: Arc<str>,

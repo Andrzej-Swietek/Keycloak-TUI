@@ -59,8 +59,16 @@ pub(crate) const IDENTITY_PROVIDERS: Resource = Resource {
                 Field::new("Store tokens", "/storeToken", FieldKind::Bool),
                 Field::new("Account linking only", "/linkOnly", FieldKind::Bool),
                 Field::new("Hide on login page", "/hideOnLogin", FieldKind::Bool),
+                Field::new("Organizations", "/organizationLinks", FieldKind::ReadOnly)
+                    .help("Managed from each organization's Identity providers tab.")
+                    .needs(KC_26_8),
+                Field::new("Organization", "/organizationId", FieldKind::ReadOnly)
+                    .help("Before 26.8 an IdP belonged to at most one organization."),
                 Field::new("First broker login flow", "/firstBrokerLoginFlowAlias", FieldKind::Text),
                 Field::new("Post broker login flow", "/postBrokerLoginFlowAlias", FieldKind::Text),
+                Field::stringly("Allow admin role mapping", "/config/allowAdminRoleMapping", FieldKind::Bool)
+                    .help("From 26.8, mappers on this IdP cannot grant realm-management or other admin roles unless this is on. Needs `manage-realm`.")
+                    .needs(KC_26_8),
             ],
         },
         Tab::Form {
@@ -73,7 +81,8 @@ pub(crate) const IDENTITY_PROVIDERS: Resource = Resource {
                 Field::new("JWKS URL", "/config/jwksUrl", FieldKind::Text),
                 Field::new("Logout URL", "/config/logoutUrl", FieldKind::Text),
                 Field::new("Client ID", "/config/clientId", FieldKind::Text),
-                Field::new("Client secret", "/config/clientSecret", FieldKind::Secret),
+                Field::new("Client secret", "/config/clientSecret", FieldKind::Secret)
+                    .help("Shown masked. From 26.8, changing the token URL, client ID or auth method needs the secret typed again."),
                 Field::new(
                     "Client auth method",
                     "/config/clientAuthMethod",

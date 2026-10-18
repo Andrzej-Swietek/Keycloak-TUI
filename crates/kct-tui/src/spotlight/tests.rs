@@ -72,11 +72,11 @@ fn unavailable_entries_stay_visible_and_say_why() {
 
 #[test]
 fn realms_are_searchable_by_name() {
-    let realms = vec!["master".to_owned(), "avsystem".to_owned()];
+    let realms = vec!["master".to_owned(), "acme".to_owned()];
     let entries = catalog(&modern(), &realms, None);
 
-    let found = titles(&entries, "avsys");
-    assert_eq!(found.first().unwrap(), "Realm: avsystem");
+    let found = titles(&entries, "acme");
+    assert_eq!(found.first().unwrap(), "Realm: acme");
 }
 
 #[test]

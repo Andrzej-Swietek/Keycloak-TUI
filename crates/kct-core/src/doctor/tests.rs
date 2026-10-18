@@ -73,7 +73,7 @@ fn a_new_server_field_is_reported_as_missing_not_broken() {
 fn component_forms_are_checked_against_the_servers_own_property_list() {
     let federation = resources::by_id("user-federation").unwrap();
     let profile = ServerProfile::from_server_info(json!({
-        "systemInfo": {"version": "26.7.3"},
+        "systemInfo": {"version": "26.8.1"},
         "componentTypes": {
             "org.keycloak.storage.UserStorageProvider": [{
                 "id": "ldap",
@@ -110,7 +110,7 @@ fn component_forms_are_checked_against_the_servers_own_property_list() {
 #[test]
 fn a_gate_on_a_feature_the_server_never_heard_of_is_broken() {
     let profile = ServerProfile::from_server_info(json!({
-        "systemInfo": {"version": "26.7.3"},
+        "systemInfo": {"version": "26.8.1"},
         "features": [{"name": "organization", "type": "DEFAULT", "enabled": true}]
     }));
 

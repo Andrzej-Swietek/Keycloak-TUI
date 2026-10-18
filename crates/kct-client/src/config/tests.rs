@@ -11,13 +11,8 @@ fn credentials() -> Credentials {
 
 #[test]
 fn urls_are_normalised_and_obvious_mistakes_rejected() {
-    let connection = Connection::new(
-        "https://kc.example.com/",
-        "master",
-        "avsystem",
-        credentials(),
-    )
-    .unwrap();
+    let connection =
+        Connection::new("https://kc.example.com/", "master", "acme", credentials()).unwrap();
     assert_eq!(connection.base_url, "https://kc.example.com");
 
     assert!(Connection::new("kc.example.com", "master", "r", credentials()).is_err());

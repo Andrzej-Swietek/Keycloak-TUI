@@ -10,7 +10,7 @@ fn connection(dry_run: bool) -> Connection {
     Connection::new(
         "https://kc.test",
         "master",
-        "avsystem",
+        "acme",
         Credentials::ClientCredentials {
             client_id: "admin-cli".into(),
             client_secret: Secret::new("s"),
@@ -24,7 +24,7 @@ fn connection(dry_run: bool) -> Connection {
 fn the_client_builds_and_exposes_its_base_url() {
     let client = KeycloakClient::connect(connection(false)).unwrap();
     assert_eq!(client.base_url(), "https://kc.test");
-    assert_eq!(client.connection().realm, "avsystem");
+    assert_eq!(client.connection().realm, "acme");
 }
 
 #[tokio::test]

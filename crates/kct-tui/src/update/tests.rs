@@ -22,10 +22,7 @@ fn users() -> &'static Resource {
 }
 
 fn model() -> Model {
-    Model::new(
-        Session::new("https://kc.test", "avsystem", "admin"),
-        users(),
-    )
+    Model::new(Session::new("https://kc.test", "acme", "admin"), users())
 }
 
 fn key(code: KeyCode) -> Msg {
@@ -67,7 +64,7 @@ fn opening_a_screen_asks_for_its_rows() {
             },
         ] => {
             assert_eq!(*fetch, Fetch::Rows);
-            assert_eq!(path.as_str(), "/admin/realms/avsystem/users");
+            assert_eq!(path.as_str(), "/admin/realms/acme/users");
             assert_eq!(*token, model.list.token);
         }
         other => panic!("expected one load effect, got {other:?}"),
@@ -133,7 +130,7 @@ fn deleting_requires_typing_the_name_and_only_then_sends_the_request() {
     match effects.as_slice() {
         [Effect::Call { method, path, .. }] => {
             assert_eq!(*method, kct_core::Method::Delete);
-            assert_eq!(path.as_str(), "/admin/realms/avsystem/users/u1");
+            assert_eq!(path.as_str(), "/admin/realms/acme/users/u1");
         }
         other => panic!("expected one delete, got {other:?}"),
     }
@@ -144,7 +141,7 @@ fn dry_run_refuses_writes_before_they_reach_the_network() {
     let model = Model {
         session: Session {
             dry_run: true,
-            ..Session::new("https://kc.test", "avsystem", "admin")
+            ..Session::new("https://kc.test", "acme", "admin")
         },
         ..listing(vec![json!({"id": "u1", "username": "alice"})])
     };
@@ -171,7 +168,7 @@ fn a_screen_the_server_cannot_serve_explains_itself_instead_of_navigating() {
             profile: kct_core::capability::ServerProfile::from_discovery(kct_core::Version::new(
                 25, 0, 6,
             )),
-            ..Session::new("https://kc.test", "avsystem", "admin")
+            ..Session::new("https://kc.test", "acme", "admin")
         },
         ..model()
     };

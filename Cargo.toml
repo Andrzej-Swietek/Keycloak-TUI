@@ -7,8 +7,8 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.90"
 license = "Apache-2.0"
-repository = "https://github.com/avsystem/keycloak-tui"
-authors = ["Andrzej Świętek <a.swietek@avsystem.com>"]
+repository = "https://github.com/Andrzej-Swietek/Keycloak-TUI"
+authors = ["Andrzej Świętek <mr.andi321@gmail.com>"]
 
 [workspace.dependencies]
 kct-core   = { path = "crates/kct-core" }

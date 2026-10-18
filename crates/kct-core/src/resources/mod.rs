@@ -6,6 +6,7 @@
 
 mod authentication;
 mod authz;
+mod client_actions;
 mod client_fields;
 mod client_policies;
 mod client_policies_global;
@@ -21,6 +22,7 @@ mod identity_providers;
 mod ldap_fields;
 mod members;
 mod observe;
+mod org_identity_providers;
 mod organizations;
 mod policies;
 mod prelude;
@@ -90,7 +92,7 @@ pub static CATALOG: &[Resource] = &[
     groups::GROUP_CHILDREN,
     members::GROUP_MEMBERS,
     members::ORG_MEMBERS,
-    organizations::ORG_IDENTITY_PROVIDERS,
+    org_identity_providers::ORG_IDENTITY_PROVIDERS,
     roles::ROLE_USERS,
     roles::ROLE_GROUPS,
     role_mappings::ROLE_MAPPINGS,

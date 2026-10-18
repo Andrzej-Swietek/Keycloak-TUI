@@ -5,7 +5,8 @@ use super::prelude::*;
 pub(crate) const CLIENT_SCOPE_FIELDS: &[Field] = &[
     Field::new("Full scope allowed", "/fullScopeAllowed", FieldKind::Bool).help(
         "On, every role the user holds reaches this client's tokens. Off, only the roles its \
-         scope mappings name.",
+         scope mappings name. Deprecated in 26.8: each token issued with it on logs a WARN, \
+         and the `full-scope-disabled` client-policy executor enforces off.",
     ),
     Field::new(
         "Browser flow override",

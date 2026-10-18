@@ -114,7 +114,7 @@ def draw(cell, path):
                 d.text((x*CW, y*CH), ch, font=FONT, fill=fg)
     img.save(path); print(img.size, "->", path)
 
-BASE = ["./target/release/kct", "-s", "http://localhost:18080", "-r", "avsystem",
+BASE = ["./target/release/kct", "-s", "http://localhost:18080", "-r", "acme",
         "--auth-realm", "master", "-u", "admin", "-p", "admin"]
 ENTER = b"\x0d"
 

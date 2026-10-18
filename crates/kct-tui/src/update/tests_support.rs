@@ -20,11 +20,11 @@ pub(super) fn role_mappings_for(user: &str) -> Model {
     let users = kct_core::resources::by_id("users").unwrap();
     let mappings = kct_core::resources::by_id("role-mappings").unwrap();
 
-    let model = Model::new(Session::new("https://kc", "avsystem", "admin"), users);
+    let model = Model::new(Session::new("https://kc", "acme", "admin"), users);
     Model {
         nav: model.nav.clone().pushed(Location {
             resource: mappings,
-            context: Context::realm("avsystem")
+            context: Context::realm("acme")
                 .with("ownerKind", "users")
                 .with("owner", user),
             crumb: Arc::from("alice"),

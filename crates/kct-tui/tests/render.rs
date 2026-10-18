@@ -33,7 +33,7 @@ fn screen(model: &Model) -> String {
 
 fn profile() -> ServerProfile {
     ServerProfile::from_server_info(json!({
-        "systemInfo": {"version": "26.7.3"},
+        "systemInfo": {"version": "26.8.1"},
         "features": [{"name": "organization", "type": "DEFAULT", "enabled": true}]
     }))
 }
@@ -41,7 +41,7 @@ fn profile() -> ServerProfile {
 fn session() -> Session {
     Session {
         profile: profile(),
-        ..Session::new("https://kc.example.com", "avsystem", "admin via admin-cli")
+        ..Session::new("https://kc.example.com", "acme", "admin via admin-cli")
     }
 }
 
@@ -65,8 +65,8 @@ fn a_listing_shows_the_catalogs_columns_and_the_servers_data() {
         json!({"id": "2", "username": "bob", "enabled": false}),
     ]));
 
-    assert!(rendered.contains("kct avsystem"), "{rendered}");
-    assert!(rendered.contains("kc 26.7.3"));
+    assert!(rendered.contains("kct acme"), "{rendered}");
+    assert!(rendered.contains("kc 26.8.1"));
     assert!(rendered.contains("Username"));
     assert!(rendered.contains("alice@example.com"));
     // A disabled account must be obvious at a glance, not a blank cell.
@@ -99,7 +99,7 @@ fn a_forbidden_screen_renders_the_remediation_not_just_the_status() {
             error: Some(kct_core::Error::Api {
                 status: 403,
                 method: kct_core::Method::Get,
-                path: "/admin/realms/avsystem/clients".into(),
+                path: "/admin/realms/acme/clients".into(),
                 message: "Forbidden".into(),
                 detail: None,
             }),
