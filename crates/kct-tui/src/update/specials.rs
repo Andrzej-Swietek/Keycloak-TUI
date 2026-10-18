@@ -36,6 +36,8 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         | "set-execution-requirement"
         | "add-execution"
         | "move-group"
+        | "set-org-membership"
+        | "set-member-type"
         | "new-authz-policy"
         | "new-authz-permission"
         | "execute-actions-email") => super::picker::open(model, action),
@@ -49,6 +51,8 @@ pub fn run(model: Model, action: &'static Action) -> Transition {
         "partial-export" => super::transfer::export(model, action),
         "partial-import" => super::transfer::ask_import(model),
         "token-for-client" => super::tokens::token_for_client(model),
+        "scim-probe" => super::tokens::scim_probe(model),
+        "scim-prepare" => super::scim::prepare_client(model, action),
         "regenerate-secret" => item_post(model, action, "client-secret"),
         "service-account-user" => fetch_item(model, action, "service-account-user"),
         "unlock-user" => unlock(model),

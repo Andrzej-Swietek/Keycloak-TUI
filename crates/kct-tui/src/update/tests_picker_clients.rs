@@ -18,12 +18,12 @@ fn assigning_a_client_role_asks_which_client_first() {
             ..crate::model::List::default()
         }
         .refiltered(users),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), users)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), users)
     };
 
     let Transition { model, effects } = super::picker::open(model, "pick-client-for-role");
     match effects.as_slice() {
-        [Effect::Load { path, .. }] => assert_eq!(path.as_str(), "/admin/realms/avsystem/clients"),
+        [Effect::Load { path, .. }] => assert_eq!(path.as_str(), "/admin/realms/acme/clients"),
         other => panic!("expected the client list, got {other:?}"),
     }
 
@@ -39,7 +39,7 @@ fn assigning_a_client_role_asks_which_client_first() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/users/u1/role-mappings/clients/c1/available"
+            "/admin/realms/acme/users/u1/role-mappings/clients/c1/available"
         ),
         other => panic!("expected the client's roles, got {other:?}"),
     }
@@ -59,12 +59,12 @@ fn a_step_offers_only_the_requirements_it_supports() {
             ..crate::model::List::default()
         }
         .refiltered(executions),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), executions)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), executions)
     };
     let model = Model {
         nav: model.nav.clone().pushed(Location {
             resource: executions,
-            context: Context::realm("avsystem").with("flow", "browser"),
+            context: Context::realm("acme").with("flow", "browser"),
             crumb: Arc::from("browser"),
         }),
         ..model
@@ -95,7 +95,7 @@ fn a_step_offers_only_the_requirements_it_supports() {
             assert_eq!(*method, Method::Put);
             assert_eq!(
                 path.as_str(),
-                "/admin/realms/avsystem/authentication/flows/browser/executions"
+                "/admin/realms/acme/authentication/flows/browser/executions"
             );
             assert_eq!(body["requirement"], json!("REQUIRED"));
             assert_eq!(body["id"], json!("e1"), "the execution travels back whole");

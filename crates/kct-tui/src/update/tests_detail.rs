@@ -22,10 +22,7 @@ fn users() -> &'static Resource {
 }
 
 fn model() -> Model {
-    Model::new(
-        Session::new("https://kc.test", "avsystem", "admin"),
-        users(),
-    )
+    Model::new(Session::new("https://kc.test", "acme", "admin"), users())
 }
 
 fn key(code: KeyCode) -> Msg {
@@ -74,7 +71,7 @@ fn descending_into_a_nested_collection_carries_the_parents_id() {
     assert_eq!(model.nav.crumbs(), vec!["Users", "alice"]);
     match effects.as_slice() {
         [Effect::Load { path, .. }] => {
-            assert_eq!(path.as_str(), "/admin/realms/avsystem/users/u1/sessions");
+            assert_eq!(path.as_str(), "/admin/realms/acme/users/u1/sessions");
         }
         other => panic!("expected a load, got {other:?}"),
     }

@@ -3,6 +3,7 @@ use super::prelude::*;
 pub(crate) const KC_26: Requirement = Requirement::MinVersion(Version::new(26, 0, 0));
 
 pub(crate) const KC_26_2: Requirement = Requirement::MinVersion(Version::new(26, 2, 0));
+pub(crate) const KC_26_8: Requirement = Requirement::MinVersion(Version::new(26, 8, 0));
 
 pub(crate) const USER_COLUMNS: &[Column] = &[
     Column::new("Username", Projection::At("/username"), Width::Flex(3)).toned(Tone::Primary),

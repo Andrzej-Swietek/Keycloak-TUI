@@ -46,6 +46,26 @@ pub(super) async fn for_client(
     gateway: &Arc<dyn Gateway>,
     tx: &UnboundedSender<Msg>,
 ) {
+    let Some(token) = client_credentials(&realm, &client_id, secret_path, gateway, tx).await else {
+        return;
+    };
+    let _ = tx.send(Msg::Text {
+        title: format!("Token for {client_id}"),
+        result: Ok(report(
+            token.expose(),
+            &format!("client_credentials as {client_id}"),
+        )),
+    });
+}
+
+/// A `client_credentials` token for this client, or `None` after telling the operator why.
+pub(super) async fn client_credentials(
+    realm: &str,
+    client_id: &str,
+    secret_path: ApiPath,
+    gateway: &Arc<dyn Gateway>,
+    tx: &UnboundedSender<Msg>,
+) -> Option<Secret> {
     let secret = match gateway.get_json(secret_path, Vec::new()).await {
         Ok(body) => body
             .get("value")
@@ -57,37 +77,38 @@ pub(super) async fn for_client(
                 "cannot read the client secret (is the client confidential?)",
                 &error,
             )));
-            return;
+            return None;
         }
     };
 
-    let Ok(token_endpoint) = ep::OIDC_TOKEN.resolve(&PathParams::realm(&realm)) else {
-        return;
-    };
+    let token_endpoint = ep::OIDC_TOKEN.resolve(&PathParams::realm(realm)).ok()?;
     let request = Request::new(Method::Post, token_endpoint)
         .with_form(vec![
             ("grant_type".to_owned(), "client_credentials".to_owned()),
-            ("client_id".to_owned(), client_id.clone()),
+            ("client_id".to_owned(), client_id.to_owned()),
             ("client_secret".to_owned(), secret),
         ])
         .expecting(Expect::Json)
         .anonymous();
 
-    let result = gateway.send(request).await.map(|response| {
+    let token = gateway.send(request).await.and_then(|response| {
         response
             .body
             .get("access_token")
             .and_then(Value::as_str)
-            .map_or_else(
-                || "the token endpoint returned no access_token".to_owned(),
-                |token| report(token, &format!("client_credentials as {client_id}")),
-            )
+            .map(Secret::new)
+            .ok_or_else(|| kct_core::Error::config("the token endpoint returned no access_token"))
     });
-
-    let _ = tx.send(Msg::Text {
-        title: format!("Token for {client_id}"),
-        result,
-    });
+    match token {
+        Ok(token) => Some(token),
+        Err(error) => {
+            let _ = tx.send(Msg::Notice(Notice::from_error(
+                &format!("no token for {client_id}"),
+                &error,
+            )));
+            None
+        }
+    }
 }
 
 /// Render a decoded token for reading. Does not verify the signature.
@@ -129,10 +150,4 @@ fn report(raw: &str, obtained_by: &str) -> String {
         format!("\nRaw\n{raw}\n"),
     ]
     .concat()
-}
-
-/// The token's fingerprint. The secret itself is not rendered.
-#[allow(dead_code)]
-fn _assert_secret_is_opaque(secret: &Secret) -> String {
-    secret.to_string()
 }

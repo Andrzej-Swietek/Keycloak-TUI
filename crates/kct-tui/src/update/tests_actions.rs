@@ -16,7 +16,7 @@ fn every_special_action_is_dispatched() {
                 let Verb::Special(name) = action.verb else {
                     return None;
                 };
-                let model = Model::new(Session::new("https://kc.test", "avsystem", "admin"), users);
+                let model = Model::new(Session::new("https://kc.test", "acme", "admin"), users);
                 let said = super::specials::run(model, action)
                     .model
                     .toasts

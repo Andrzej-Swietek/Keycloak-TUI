@@ -27,7 +27,7 @@ fn editing_user_attributes() -> Model {
 
     let model = Model {
         detail: Some(detail.clone()),
-        ..Model::new(Session::new("https://kc", "avsystem", "admin"), users)
+        ..Model::new(Session::new("https://kc", "acme", "admin"), users)
     };
 
     let editor = Attributes::open(

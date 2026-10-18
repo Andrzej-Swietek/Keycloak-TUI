@@ -59,7 +59,7 @@ mod tests {
     #[test]
     fn a_locally_filtered_list_asks_for_everything_at_once() {
         let flows = resources::by_id("auth-flows").unwrap();
-        let planned = list(flows, &Context::realm("avsystem"), &Query::page(0, 10)).unwrap();
+        let planned = list(flows, &Context::realm("acme"), &Query::page(0, 10)).unwrap();
 
         let max = planned.query.iter().find(|(key, _)| key == "max").unwrap();
         assert_ne!(
@@ -72,9 +72,9 @@ mod tests {
     fn a_server_filtered_list_forwards_the_operators_query() {
         let users = resources::by_id("users").unwrap();
         let query = Query::page(50, 25).with_search("alice").with_exact(true);
-        let planned = list(users, &Context::realm("avsystem"), &query).unwrap();
+        let planned = list(users, &Context::realm("acme"), &query).unwrap();
 
-        assert_eq!(planned.path.as_str(), "/admin/realms/avsystem/users");
+        assert_eq!(planned.path.as_str(), "/admin/realms/acme/users");
         assert!(
             planned
                 .query

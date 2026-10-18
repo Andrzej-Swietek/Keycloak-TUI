@@ -15,7 +15,7 @@ fn granting_offers_the_roles_the_owner_does_not_have_yet() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/users/u1/role-mappings/realm/available",
+            "/admin/realms/acme/users/u1/role-mappings/realm/available",
             "granting must list what is missing, not what is already held"
         ),
         other => panic!("expected one load, got {other:?}"),
@@ -30,7 +30,7 @@ fn revoking_offers_only_what_is_actually_assigned() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/users/u1/role-mappings/realm"
+            "/admin/realms/acme/users/u1/role-mappings/realm"
         ),
         other => panic!("expected one load, got {other:?}"),
     }
@@ -68,7 +68,7 @@ fn several_roles_can_be_granted_in_one_request() {
             assert_eq!(*method, Method::Post);
             assert_eq!(
                 path.as_str(),
-                "/admin/realms/avsystem/users/u1/role-mappings/realm"
+                "/admin/realms/acme/users/u1/role-mappings/realm"
             );
             assert_eq!(roles.len(), 2, "both ticked roles go in one call");
             assert_eq!(roles[0]["name"], json!("view-users"));

@@ -34,10 +34,21 @@ pub(crate) fn organization_domains(row: &Value) -> String {
                 .iter()
                 .map(|d| {
                     let name = d.get("name").and_then(Value::as_str).unwrap_or_default();
-                    match d.get("verified").and_then(Value::as_bool) {
-                        Some(true) => format!("{name} ✓"),
-                        _ => name.to_owned(),
+                    let mut shown = name.to_owned();
+                    if d.get("verified").and_then(Value::as_bool) == Some(true) {
+                        shown.push_str(" ✓");
                     }
+                    // 26.8 binds a domain to one IdP; before that the IdP named the domain.
+                    if let Some(idp) = d.get("identityProviderAlias").and_then(Value::as_str) {
+                        let arrow = if d.get("autoRedirect").and_then(Value::as_bool) == Some(true)
+                        {
+                            "⇒"
+                        } else {
+                            "→"
+                        };
+                        shown = format!("{shown} {arrow} {idp}");
+                    }
+                    shown
                 })
                 .collect::<Vec<_>>()
                 .join(", ")
@@ -74,8 +85,10 @@ pub(crate) const ORGANIZATIONS: Resource = Resource {
                 Field::new("Enabled", "/enabled", FieldKind::Bool),
                 Field::new("Description", "/description", FieldKind::Multiline),
                 Field::new("Redirect URL", "/redirectUrl", FieldKind::Text),
-                Field::new("Domains", "/domains", FieldKind::Json)
-                    .help("[{\"name\": \"example.com\", \"verified\": true}]"),
+                Field::new("Domains", "/domains", FieldKind::Json).help(
+                    "[{\"name\": \"example.com\", \"verified\": true}]. From 26.8 a domain may add \
+                     \"identityProviderAlias\" and \"autoRedirect\"; the IdP must be linked first.",
+                ),
                 Field::new("Attributes", "/attributes", FieldKind::Attributes),
             ],
         },
@@ -118,49 +131,4 @@ pub(crate) const ORGANIZATIONS: Resource = Resource {
     ],
     keywords: &["tenant", "multitenancy", "org", "customer"],
     summary: "In-realm tenants with their own domains, members and identity providers.",
-};
-
-pub(crate) const ORG_IDENTITY_PROVIDERS: Resource = Resource {
-    id: "org-identity-providers",
-    singular: "Organization IdP",
-    plural: "Organization identity providers",
-    section: Section::Manage,
-    collection: ep::ORGANIZATION_IDPS,
-    item: None,
-    shape: Shape::Array,
-    fixed_params: &[],
-    key: Key::ALIAS,
-    new_object: None,
-    label: &["/alias", "/displayName"],
-    columns: &[
-        Column::new("Alias", Projection::At("/alias"), Width::Flex(2)).toned(Tone::Primary),
-        Column::new("Provider", Projection::At("/providerId"), Width::Fixed(14)),
-        Column::new(
-            "Enabled",
-            Projection::Bool {
-                pointer: "/enabled",
-                yes: "yes",
-                no: "DISABLED",
-            },
-            Width::Fixed(8),
-        )
-        .toned(Tone::Flag),
-        Column::new(
-            "Domain",
-            Projection::At("/config/kc.org.domain"),
-            Width::Flex(2),
-        ),
-    ],
-    search: Search::Client,
-    ops: Ops::RO.with(Ops::CREATE).with(Ops::DELETE),
-    requirement: KC_26,
-    tabs: &[Tab::Raw],
-    actions: &[Action::new(
-        "delete",
-        "Unlink identity provider",
-        Verb::Delete,
-        Danger::Confirm,
-    )],
-    keywords: &["broker", "sso", "tenant idp"],
-    summary: "Identity providers bound to this organization.",
 };

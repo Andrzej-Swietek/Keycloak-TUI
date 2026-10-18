@@ -81,7 +81,7 @@ fn a_policy_type_that_needs_more_than_a_name_says_so() {
     let error = Error::Api {
         status: 500,
         method: Method::Post,
-        path: "/admin/realms/avsystem/clients/c1/authz/resource-server/policy/group".to_owned(),
+        path: "/admin/realms/acme/clients/c1/authz/resource-server/policy/group".to_owned(),
         message: "unknown_error".to_owned(),
         detail: None,
     };
@@ -89,4 +89,36 @@ fn a_policy_type_that_needs_more_than_a_name_says_so() {
     let hint = hint::for_error(&error).expect("a 500 always carries a hint");
     assert!(hint.contains("policy type"), "{hint}");
     assert!(!hint.contains("federation"), "{hint}");
+}
+
+#[test]
+fn a_masked_idp_secret_sent_to_a_new_endpoint_asks_for_the_secret() {
+    // Verified against Keycloak 26.8.1: changing `tokenUrl` while the body still carries the
+    // masked `**********` secret is refused with this exact message.
+    let error = Error::Api {
+        status: 400,
+        method: Method::Put,
+        path: "/admin/realms/acme/identity-provider/instances/oidc1".to_owned(),
+        message: "Client secret must be re-entered when the token URL, client ID, \
+                  authentication method, or related destination settings are changed"
+            .to_owned(),
+        detail: None,
+    };
+
+    let hint = hint::for_error(&error).expect("a 400 always carries a hint");
+    assert!(hint.contains("Type the secret again"), "{hint}");
+}
+
+#[test]
+fn a_forbidden_client_secret_names_manage_clients() {
+    // Keycloak 26.8.0 stopped showing secrets to `view-clients`; the endpoint answers 403.
+    let error = Error::Api {
+        status: 403,
+        method: Method::Get,
+        path: "/admin/realms/acme/clients/c1/client-secret".to_owned(),
+        message: "HTTP 403 Forbidden".to_owned(),
+        detail: None,
+    };
+
+    assert!(hint::for_error(&error).unwrap().contains("manage-clients"));
 }

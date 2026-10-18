@@ -41,7 +41,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        keycloak: ["26.6.1", "26.7.3"]
+        keycloak: ["26.6.1", "26.7.3", "26.8.1"]
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable

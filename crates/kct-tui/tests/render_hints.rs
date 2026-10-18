@@ -27,7 +27,7 @@ fn a_read_only_screen_offers_no_write_keys() {
     let on = |id| {
         let resource = kct_core::resources::by_id(id).unwrap();
         screen(&Model::new(
-            Session::new("https://kc.test", "avsystem", "admin"),
+            Session::new("https://kc.test", "acme", "admin"),
             resource,
         ))
     };

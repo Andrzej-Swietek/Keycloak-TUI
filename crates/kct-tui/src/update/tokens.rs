@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use kct_core::path::{PathParams, endpoints as ep};
-use kct_core::{Method, plan};
+use kct_core::{ApiPath, Method, plan};
 
 use crate::effect::Effect;
 use crate::model::{Model, Overlay};
@@ -42,27 +42,40 @@ pub fn copy_curl(model: Model) -> Transition {
 /// gets — the usual answer to "the app says my role is missing".
 #[must_use]
 pub fn token_for_client(model: Model) -> Transition {
+    as_client(model, |realm, client_id, secret_path| Effect::ClientToken {
+        realm,
+        client_id,
+        secret_path,
+    })
+}
+
+/// Call the realm's SCIM endpoint with the selected client's token and explain the answer.
+#[must_use]
+pub fn scim_probe(model: Model) -> Transition {
+    as_client(model, |realm, client_id, secret_path| Effect::ScimProbe {
+        realm,
+        client_id,
+        secret_path,
+    })
+}
+
+fn as_client(model: Model, effect: impl FnOnce(String, String, ApiPath) -> Effect) -> Transition {
     let Some((id, client_id)) = super::actions::selection(&model) else {
         return Transition::pure(model.noticed(Notice::warning("no client selected")));
     };
 
-    let planned = match plan::item(model.resource(), model.context(), &id) {
-        Ok(planned) => planned,
-        Err(error) => {
-            return Transition::pure(
-                model.noticed(Notice::from_error("cannot read client", &error)),
-            );
+    match plan::item(model.resource(), model.context(), &id) {
+        Ok(planned) => {
+            let realm = model.session.realm.to_string();
+            Transition::with(
+                model,
+                effect(realm, client_id, planned.path.sub("client-secret")),
+            )
         }
-    };
-
-    Transition::with(
-        model.clone(),
-        Effect::ClientToken {
-            realm: model.session.realm.to_string(),
-            client_id,
-            secret_path: planned.path.sub("client-secret"),
-        },
-    )
+        Err(error) => {
+            Transition::pure(model.noticed(Notice::from_error("cannot read client", &error)))
+        }
+    }
 }
 
 /// Show the realm's JWKS.

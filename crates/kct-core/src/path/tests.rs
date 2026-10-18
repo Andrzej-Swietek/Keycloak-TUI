@@ -2,7 +2,7 @@ use super::*;
 
 #[test]
 fn resolves_multi_slot_templates() {
-    let params = PathParams::realm("avsystem")
+    let params = PathParams::realm("acme")
         .with("ownerKind", "users")
         .with("owner", "42")
         .with("client", "abc");
@@ -12,7 +12,7 @@ fn resolves_multi_slot_templates() {
             .resolve(&params)
             .unwrap()
             .as_str(),
-        "/admin/realms/avsystem/users/42/role-mappings/clients/abc"
+        "/admin/realms/acme/users/42/role-mappings/clients/abc"
     );
 }
 
@@ -43,7 +43,7 @@ fn templates_declare_their_own_slots() {
         endpoints::ROLE_MAPPINGS_CLIENT.slots(),
         vec!["realm", "ownerKind", "owner", "client"]
     );
-    assert!(endpoints::SERVER_INFO.slots().is_empty());
+    assert_eq!(endpoints::SERVER_INFO.slots(), Vec::<&str>::new());
 }
 
 #[test]

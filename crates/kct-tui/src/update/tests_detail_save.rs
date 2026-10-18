@@ -90,10 +90,7 @@ fn saving_an_embedded_item_writes_the_whole_document_back() {
             draft: edited,
             ..Detail::loaded("email", "email", json!({"name": "email"}))
         }),
-        ..Model::new(
-            Session::new("https://kc.test", "avsystem", "admin"),
-            attributes,
-        )
+        ..Model::new(Session::new("https://kc.test", "acme", "admin"), attributes)
     };
 
     let confirming = update(model, key(KeyCode::Char('w'))).model;
@@ -107,7 +104,7 @@ fn saving_an_embedded_item_writes_the_whole_document_back() {
                 ..
             },
         ] => {
-            assert_eq!(path.as_str(), "/admin/realms/avsystem/users/profile");
+            assert_eq!(path.as_str(), "/admin/realms/acme/users/profile");
             assert_eq!(body["attributes"][1]["displayName"], json!("E-mail"));
             assert_eq!(body["attributes"][0]["name"], json!("username"));
             assert_eq!(body["groups"][0]["name"], json!("user-metadata"));
@@ -147,7 +144,7 @@ fn a_successful_save_leaves_the_object_open() {
             "alice",
             json!({"id": "u1"}),
         )),
-        ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), users)
+        ..Model::new(Session::new("https://kc.test", "acme", "admin"), users)
     };
 
     let Transition { model, effects } = update(
@@ -180,7 +177,7 @@ fn write_quit_returns_to_the_listing() {
             "alice",
             json!({"id": "u1"}),
         )),
-        ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), users)
+        ..Model::new(Session::new("https://kc.test", "acme", "admin"), users)
     }
     .closing_after_save();
 

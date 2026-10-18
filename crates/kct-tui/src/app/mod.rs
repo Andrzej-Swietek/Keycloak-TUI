@@ -4,6 +4,7 @@ mod clipboard;
 mod effects;
 mod files;
 mod requests;
+mod scim;
 mod tokens;
 
 use std::io;

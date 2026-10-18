@@ -14,6 +14,8 @@ pub const ATTACK_DETECTION: Template =
 /// OIDC protocol endpoints; not part of the admin resource tree.
 pub const OIDC_DISCOVERY: Template = Template("/realms/{realm}/.well-known/openid-configuration");
 pub const OIDC_TOKEN: Template = Template("/realms/{realm}/protocol/openid-connect/token");
+/// SCIM 2.0 service root; enabled per realm through `scimApiEnabled`.
+pub const SCIM: Template = Template("/realms/{realm}/scim/v2");
 pub const OIDC_INTROSPECT: Template =
     Template("/realms/{realm}/protocol/openid-connect/token/introspect");
 pub const OIDC_USERINFO: Template = Template("/realms/{realm}/protocol/openid-connect/userinfo");

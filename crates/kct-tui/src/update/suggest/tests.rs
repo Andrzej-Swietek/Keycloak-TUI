@@ -9,7 +9,7 @@ use serde_json::json;
 fn session_with_themes() -> Session {
     Session {
         profile: ServerProfile::from_server_info(json!({
-            "systemInfo": {"version": "26.7.3"},
+            "systemInfo": {"version": "26.8.1"},
             "themes": {
                 "login": [{"name": "keycloak"}, {"name": "keycloak.v2"}, {"name": "base"}]
             }
@@ -43,7 +43,10 @@ fn theme_fields_offer_what_the_server_actually_has() {
 #[test]
 fn a_field_with_no_known_vocabulary_suggests_nothing() {
     let field = Field::new("Description", "/description", FieldKind::Multiline);
-    assert!(for_field(&field, realm(), &session_with_themes()).is_empty());
+    assert_eq!(
+        for_field(&field, realm(), &session_with_themes()),
+        Vec::<String>::new()
+    );
 }
 
 #[test]
@@ -77,7 +80,7 @@ fn a_provider_a_deployed_extension_registers_is_offered() {
                 "openid-connect": [{"id": "oidc-usermodel-attribute-mapper"}, {"id": "acme-custom-mapper"}]
             },
         })),
-        ..Session::new("https://kc", "avsystem", "admin")
+        ..Session::new("https://kc", "acme", "admin")
     };
 
     let listeners = for_field(

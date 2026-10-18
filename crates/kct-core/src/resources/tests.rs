@@ -121,14 +121,17 @@ fn a_rows_own_id_and_its_parents_id_can_share_a_slot_name() {
     assert_eq!(mappers.collection_slots(), vec!["component"]);
     assert_eq!(mappers.item_slot(), Some("component"));
 
-    assert!(by_id("users").unwrap().collection_slots().is_empty());
+    assert_eq!(
+        by_id("users").unwrap().collection_slots(),
+        Vec::<&str>::new()
+    );
     assert_eq!(by_id("users").unwrap().item_slot(), Some("user"));
 }
 
 #[test]
 fn nested_component_collections_resolve_their_parent_filter() {
     let mappers = by_id("federation-mappers").unwrap();
-    let params = PathParams::realm("avsystem").with("component", "ldap-1");
+    let params = PathParams::realm("acme").with("component", "ldap-1");
     let resolved = mappers.resolved_params(&params);
 
     assert!(resolved.contains(&("parent".to_owned(), "ldap-1".to_owned())));

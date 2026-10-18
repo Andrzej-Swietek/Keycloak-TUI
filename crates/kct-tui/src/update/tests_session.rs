@@ -23,10 +23,7 @@ fn users() -> &'static Resource {
 }
 
 fn model() -> Model {
-    Model::new(
-        Session::new("https://kc.test", "avsystem", "admin"),
-        users(),
-    )
+    Model::new(Session::new("https://kc.test", "acme", "admin"), users())
 }
 
 fn key(code: KeyCode) -> Msg {
@@ -131,7 +128,7 @@ fn a_failed_write_reports_the_servers_own_message() {
     let error = kct_core::Error::Api {
         status: 409,
         method: kct_core::Method::Post,
-        path: "/admin/realms/avsystem/users".into(),
+        path: "/admin/realms/acme/users".into(),
         message: "User exists with same username".into(),
         detail: None,
     };

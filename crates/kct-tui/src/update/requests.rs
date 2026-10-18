@@ -30,14 +30,16 @@ pub(super) fn requests(commit: &Commit, chosen: &[Value], labels: &str) -> Vec<E
             .first()
             .and_then(|option| option.get(*from).cloned())
             .map(|value| {
+                // An empty field means the chosen value is the whole body.
+                let body = if field.is_empty() {
+                    value
+                } else {
+                    kct_core::json::set_at(base.clone(), &format!("/{field}"), value)
+                };
                 Effect::call(
                     *method,
                     path.clone(),
-                    Some(kct_core::json::set_at(
-                        base.clone(),
-                        &format!("/{field}"),
-                        value,
-                    )),
+                    Some(body),
                     format!("{title}: {labels}"),
                 )
             })

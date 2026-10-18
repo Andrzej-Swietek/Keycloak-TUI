@@ -9,7 +9,7 @@ use crate::effect::Effect;
 use crate::msg::{Msg, Notice};
 
 use super::requests::{call, fetch_body, load};
-use super::{clipboard, files, tokens};
+use super::{clipboard, files, scim, tokens};
 
 /// Interpret one effect. Each produces at most one data message plus a log entry, so the
 /// update loop stays the only place that decides anything.
@@ -64,6 +64,12 @@ pub async fn run(
             client_id,
             secret_path,
         } => tokens::for_client(realm, client_id, secret_path, &gateway, tx).await,
+
+        Effect::ScimProbe {
+            realm,
+            client_id,
+            secret_path,
+        } => scim::probe(realm, client_id, secret_path, &gateway, tx).await,
 
         Effect::WriteFile { path, contents } => files::write(&path, &contents, tx).await,
 

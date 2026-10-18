@@ -61,7 +61,7 @@ pub(crate) const LOGIN_EVENTS: Resource = Resource {
         Column::new("Time", Projection::EpochMillis("/time"), Width::Fixed(19)),
         Column::new("Type", Projection::At("/type"), Width::Flex(3)).toned(Tone::Primary),
         Column::new("Client", Projection::At("/clientId"), Width::Flex(3)),
-        Column::new("User", Projection::At("/userId"), Width::Flex(3)).toned(Tone::Muted),
+        Column::new("User", Projection::Compute(event_user), Width::Flex(3)).toned(Tone::Muted),
         Column::new("IP", Projection::At("/ipAddress"), Width::Fixed(16)).toned(Tone::Muted),
         Column::new("Error", Projection::At("/error"), Width::Flex(3)).toned(Tone::Bad),
     ],
@@ -134,3 +134,15 @@ pub(crate) const ADMIN_EVENTS: Resource = Resource {
     ],
     summary: "Every configuration change, with the representation when details are on.",
 };
+
+/// The acting user, and who was behind them when an admin impersonated (Keycloak 26.8+).
+fn event_user(row: &Value) -> String {
+    let user = row
+        .get("userId")
+        .and_then(Value::as_str)
+        .unwrap_or_default();
+    match row.pointer("/details/impersonator").and_then(Value::as_str) {
+        Some(admin) => format!("{user} ← {admin}"),
+        None => user.to_owned(),
+    }
+}

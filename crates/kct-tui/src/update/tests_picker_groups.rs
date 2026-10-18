@@ -14,11 +14,11 @@ fn role_mappings_for(user: &str) -> Model {
     let users = kct_core::resources::by_id("users").unwrap();
     let mappings = kct_core::resources::by_id("role-mappings").unwrap();
 
-    let model = Model::new(Session::new("https://kc", "avsystem", "admin"), users);
+    let model = Model::new(Session::new("https://kc", "acme", "admin"), users);
     Model {
         nav: model.nav.clone().pushed(Location {
             resource: mappings,
-            context: Context::realm("avsystem")
+            context: Context::realm("acme")
                 .with("ownerKind", "users")
                 .with("owner", user),
             crumb: Arc::from("alice"),
@@ -35,11 +35,11 @@ fn opened_picker(action: &'static str) -> Transition {
 fn joining_groups_sends_one_put_per_group() {
     let users = kct_core::resources::by_id("users").unwrap();
     let user_groups = kct_core::resources::by_id("user-groups").unwrap();
-    let base = Model::new(Session::new("https://kc", "avsystem", "admin"), users);
+    let base = Model::new(Session::new("https://kc", "acme", "admin"), users);
     let model = Model {
         nav: base.nav.clone().pushed(Location {
             resource: user_groups,
-            context: Context::realm("avsystem").with("user", "u1"),
+            context: Context::realm("acme").with("user", "u1"),
             crumb: Arc::from("alice"),
         }),
         ..base
@@ -63,7 +63,7 @@ fn joining_groups_sends_one_put_per_group() {
     match &effects[0] {
         Effect::Call { method, path, .. } => {
             assert_eq!(*method, Method::Put);
-            assert_eq!(path.as_str(), "/admin/realms/avsystem/users/u1/groups/g1");
+            assert_eq!(path.as_str(), "/admin/realms/acme/users/u1/groups/g1");
         }
         other => panic!("unexpected {other:?}"),
     }

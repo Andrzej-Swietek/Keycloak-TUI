@@ -17,11 +17,8 @@ fn key(code: KeyCode) -> Msg {
 fn on_policies() -> Model {
     let policies = kct_core::resources::by_id("client-authz-policies").unwrap();
     Model {
-        nav: crate::model::Nav::rooted(policies, Context::realm("avsystem").with("client", "c1")),
-        ..Model::new(
-            Session::new("https://kc.test", "avsystem", "admin"),
-            policies,
-        )
+        nav: crate::model::Nav::rooted(policies, Context::realm("acme").with("client", "c1")),
+        ..Model::new(Session::new("https://kc.test", "acme", "admin"), policies)
     }
 }
 
@@ -35,7 +32,7 @@ fn creating_a_policy_asks_the_server_which_types_exist() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/clients/c1/authz/resource-server/policy/providers"
+            "/admin/realms/acme/clients/c1/authz/resource-server/policy/providers"
         ),
         other => panic!("expected the type list to be fetched, got {other:?}"),
     }

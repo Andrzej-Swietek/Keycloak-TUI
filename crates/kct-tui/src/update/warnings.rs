@@ -88,18 +88,27 @@ mod tests {
     #[test]
     fn a_declared_attribute_is_not_flagged() {
         let model = model(UnmanagedAttributes::Discarded, &["department"]);
-        assert!(before_save(&model, &json!({"attributes": {"department": ["x"]}})).is_empty());
+        assert_eq!(
+            before_save(&model, &json!({"attributes": {"department": ["x"]}})),
+            Vec::<String>::new()
+        );
     }
 
     #[test]
     fn a_realm_that_allows_unmanaged_attributes_needs_no_warning() {
         let model = model(UnmanagedAttributes::Allowed, &[]);
-        assert!(before_save(&model, &json!({"attributes": {"anything": ["x"]}})).is_empty());
+        assert_eq!(
+            before_save(&model, &json!({"attributes": {"anything": ["x"]}})),
+            Vec::<String>::new()
+        );
     }
 
     #[test]
     fn edits_that_do_not_touch_attributes_are_silent() {
         let model = model(UnmanagedAttributes::Discarded, &[]);
-        assert!(before_save(&model, &json!({"enabled": false})).is_empty());
+        assert_eq!(
+            before_save(&model, &json!({"enabled": false})),
+            Vec::<String>::new()
+        );
     }
 }

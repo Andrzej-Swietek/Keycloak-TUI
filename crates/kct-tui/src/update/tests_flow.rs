@@ -12,15 +12,9 @@ use super::{Transition, update};
 
 fn on_executions() -> Model {
     let executions = kct_core::resources::by_id("flow-executions").unwrap();
-    let model = Model::new(
-        Session::new("https://kc.test", "avsystem", "admin"),
-        executions,
-    );
+    let model = Model::new(Session::new("https://kc.test", "acme", "admin"), executions);
     Model {
-        nav: crate::model::Nav::rooted(
-            executions,
-            Context::realm("avsystem").with("flow", "browser"),
-        ),
+        nav: crate::model::Nav::rooted(executions, Context::realm("acme").with("flow", "browser")),
         ..model
     }
 }
@@ -43,7 +37,7 @@ fn adding_a_step_offers_the_servers_authenticators() {
     match effects.as_slice() {
         [Effect::Load { path, .. }] => assert_eq!(
             path.as_str(),
-            "/admin/realms/avsystem/authentication/authenticator-providers"
+            "/admin/realms/acme/authentication/authenticator-providers"
         ),
         other => panic!("expected the provider list to be fetched, got {other:?}"),
     }
@@ -159,7 +153,7 @@ fn moving_a_group_never_offers_the_group_itself() {
             envelope: Arc::new(json!(rows)),
             ..List::default()
         },
-        ..Model::new(Session::new("https://kc.test", "avsystem", "admin"), groups)
+        ..Model::new(Session::new("https://kc.test", "acme", "admin"), groups)
     };
 
     let opened = super::actions::run(model, action).model;

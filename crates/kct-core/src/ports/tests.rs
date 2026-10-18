@@ -75,7 +75,7 @@ async fn saving_preserves_fields_the_tool_does_not_model() {
     gateway
         .save(
             users,
-            &Context::realm("avsystem"),
+            &Context::realm("acme"),
             "u1",
             &from_server,
             json!({"enabled": false}),
@@ -90,10 +90,7 @@ async fn saving_preserves_fields_the_tool_does_not_model() {
         json!(["nested"]),
         "unknown fields must survive the round-trip"
     );
-    assert_eq!(
-        gateway.last().path.as_str(),
-        "/admin/realms/avsystem/users/u1"
-    );
+    assert_eq!(gateway.last().path.as_str(), "/admin/realms/acme/users/u1");
 }
 
 #[tokio::test]
@@ -101,14 +98,14 @@ async fn listing_a_nested_component_collection_sends_the_parent_filter() {
     let gateway = Recorder::replying(json!([]));
     let mappers = resources::by_id("federation-mappers").unwrap();
 
-    let context = Context::realm("avsystem").with("component", "ldap-1");
+    let context = Context::realm("acme").with("component", "ldap-1");
     gateway
         .list(mappers, &context, &Query::new())
         .await
         .unwrap();
 
     let sent = gateway.last();
-    assert_eq!(sent.path.as_str(), "/admin/realms/avsystem/components");
+    assert_eq!(sent.path.as_str(), "/admin/realms/acme/components");
     assert!(
         sent.query
             .contains(&("parent".to_owned(), "ldap-1".to_owned()))
@@ -124,7 +121,7 @@ async fn responses_wrapped_in_an_object_still_produce_rows() {
     let keys = resources::by_id("realm-keys").unwrap();
 
     let page = gateway
-        .list(keys, &Context::realm("avsystem"), &Query::new())
+        .list(keys, &Context::realm("acme"), &Query::new())
         .await
         .unwrap();
 
@@ -152,7 +149,7 @@ async fn a_403_on_serverinfo_degrades_instead_of_failing_the_session() {
             }
             Ok(Response {
                 status: 200,
-                body: json!({"issuer": "https://kc.test/realms/avsystem"}),
+                body: json!({"issuer": "https://kc.test/realms/acme"}),
                 text: None,
                 location: None,
             })
@@ -163,10 +160,7 @@ async fn a_403_on_serverinfo_degrades_instead_of_failing_the_session() {
         }
     }
 
-    let profile = ForbiddenServerInfo
-        .server_profile("avsystem")
-        .await
-        .unwrap();
+    let profile = ForbiddenServerInfo.server_profile("acme").await.unwrap();
     assert_eq!(profile.source, crate::capability::ProfileSource::Discovery);
     assert!(profile.version.is_unknown());
     // And, critically, the operator can still use every screen.

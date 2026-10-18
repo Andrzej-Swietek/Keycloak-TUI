@@ -3,7 +3,7 @@
 A terminal UI for administering Keycloak — built for the case where the admin console is not
 an option: a jump host, an SSH session into a locked-down environment, an incident at 3am.
 
-Verified against **Keycloak 26.7.3**; floor is 25.
+Verified against **Keycloak 26.8.1** (and 26.7.3, 26.6.1 in CI); floor is 25.
 
 ```
 kct -s https://sso.example.com -u admin           # prompts for the password
@@ -18,7 +18,7 @@ tool covers the admin surface rather than a curated slice of it:
 
 | Area | Screens |
 |---|---|
-| Manage | users (credentials, groups, sessions, consents, identity links, realm and client role mappings), groups (children, members), organizations (members, identity providers) |
+| Manage | users (credentials, groups, sessions, consents, identity links, realm and client role mappings), groups (children, members), organizations (members and their membership type, identity providers and how they enrol users, domain routing) |
 | Configure | clients (roles, mappers, scopes, effective mappers, sessions, authz resources/scopes/policies/permissions), client scopes, realm roles, identity providers, user federation, authentication flows, required actions, initial access tokens |
 | Realm | realm settings (general, login, sessions, tokens, security, flows & OTP, email, themes), keys, key providers, user profile, client policies and profiles, event configuration |
 | Observe | sessions per client, login events, admin events |
@@ -42,7 +42,7 @@ screen's actions · `/` filter · `s` server-side search · `⏎` open · `n` ne
 ## `kct doctor` — resilience you can measure
 
 ```
-kct -s https://sso.example.com -u admin -r avsystem doctor
+kct -s https://sso.example.com -u admin -r acme doctor
 ```
 
 Probes every screen against a **live server**, compares the catalog to what came back, and
@@ -118,6 +118,13 @@ advertises that no form offered; they are offered now.
 - `--dry-run` refuses every write and says what would have been sent.
 - A 404 that really means "the realm has not opted in" says so, and names the switch.
 - An opaque 500 points at user federation, which is what causes it far more often than not.
+- *Probe SCIM as this client* fetches the client's token, calls `/scim/v2` with it and names
+  the missing piece: the realm switch (404), the `…/scim/v2` audience (401), or the
+  `view-users`/`manage-users` role on the service account (403). *Prepare client for SCIM*
+  adds the audience mapper.
+- Saving an identity provider with its masked secret after changing the token URL, client ID
+  or auth method is refused by 26.8; the hint says to type the secret again rather than
+  "the payload was rejected".
 - The token inspector says when Keycloak issued a *lightweight* access token, so the missing
   `sub`, `aud` and roles read as a design choice rather than a bug.
 
@@ -148,7 +155,7 @@ realm  = "master"
 
 [contexts.prod]
 server     = "https://sso.example.com"
-realm      = "avsystem"
+realm      = "acme"
 auth_realm = "master"
 username   = "sre-admin"
 screen     = "user-federation"
@@ -157,13 +164,12 @@ screen     = "user-federation"
 ## Development
 
 ```
-cargo test                                                  # 191 tests, no server needed
+cargo test                                                  # 226 tests, no server needed
 cargo clippy --all-targets                                  # clean under clippy::pedantic
 
 docker run -d -p 18080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin \
-  -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.7.3 start-dev
-KCT_TEST_SERVER=http://localhost:18080 cargo test -p kct-client --test live \
-  --test live_nested --test live_create
+  -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak:26.8.1 start-dev
+KCT_TEST_SERVER=http://localhost:18080 cargo test -p kct-client --tests
 cargo run -- -s http://localhost:18080 -u admin -p admin doctor   # drift check
 ```
 
@@ -180,10 +186,3 @@ references `$KC_TOKEN` rather than pasting a bearer into your clipboard history.
 
 *Export* opens the realm representation in a viewer; `s` writes it to a file. *Import* reads
 one back as a partial import, skipping objects that already exist rather than overwriting them.
-
-## Not wired up yet
-
-Declared in the catalog and reachable from the palette, but reported plainly rather than
-silently doing nothing: adding steps or sub-flows to an authentication flow, binding a flow to
-the realm, moving a group to another parent, and creating an object from a pasted JSON
-document.
